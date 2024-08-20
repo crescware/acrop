@@ -1,4 +1,4 @@
-import { type File, isImportDeclaration, type Node } from '@babel/types';
+import { type File, isImportDeclaration, type Node } from "@babel/types";
 
 type ImportInfo = Readonly<{
   path: string;
@@ -19,7 +19,7 @@ export function findImportPaths(file: File): readonly ImportInfo[] {
       return;
     }
 
-    if ('body' in node && Array.isArray(node.body)) {
+    if ("body" in node && Array.isArray(node.body)) {
       node.body.forEach((v) => traverse(v));
       return;
     }
