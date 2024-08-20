@@ -4,7 +4,7 @@
   "version": "0.0.5",
   "author": "Crescware Inc.",
   "bin": {
-    "acrop": "./dist/index.js"
+    "acrop": "./dist/index.mjs"
   },
   "bugs": {
     "url": "https://github.com/crescware/acrop/issues"
@@ -46,7 +46,7 @@
     "url": "git+https://github.com/crescware/acrop.git"
   },
   "scripts": {
-    "build": "tsup ./index.ts --format esm",
+    "build": "tsup ./index.ts  --format esm && echo '#!/usr/bin/env node' | cat - dist/index.js > dist/index.mjs && rm dist/index.js",
     "check:type": "tsc -p ./tsconfig.json --noEmit",
     "start": "tsx ./index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
