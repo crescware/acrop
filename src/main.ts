@@ -65,7 +65,7 @@ export async function main(): Promise<void> {
                 : `./${relative(root, dirname(tsPath))}/**/*`,
             ]
               .filter((v) => v !== null)
-              // index.ts を許容するためにそのディレクトリ自身も許容する glob を追加
+              // Add a glob pattern that allows the directory itself to include index.ts
               .flatMap((v) => [v, v.replace(/\/\*\*\/\*$/, "")]);
 
             return allowed.reduce(
@@ -102,7 +102,7 @@ export async function main(): Promise<void> {
                 : `./${relative(root, dirname(tsPath))}/**/*`,
             ]
               .filter((v) => v !== null)
-              // index.ts を許容するためにそのディレクトリ自身も許容する glob を追加
+              // Add a glob pattern that allows the directory itself to include index.ts
               .flatMap((v) => [v, v.replace(/\/\*\*\/\*$/, "")]);
 
             return allowed.reduce(

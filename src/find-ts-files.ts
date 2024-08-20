@@ -14,7 +14,7 @@ export function findTsFiles(
     for (const file of files) {
       const fullPath = join(dir, file);
 
-      // .gitignoreにマッチする場合はスキップ
+      // Skip if it matches .gitignore
       if (ig.ignores(relative(rootDir, fullPath))) {
         continue;
       }
