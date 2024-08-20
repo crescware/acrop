@@ -19,8 +19,8 @@
   },
   "devDependencies": {
     "@types/node": "20.16.1",
-    "esbuild": "0.23.1",
     "prettier": "3.3.3",
+    "tsup": "8.2.4",
     "tsx": "4.17.0",
     "typescript": "5.5.4"
   },
@@ -43,7 +43,7 @@
     "url": "git+https://github.com/crescware/acrop.git"
   },
   "scripts": {
-    "build": "esbuild ./index.ts --bundle --outdir=dist --platform=node --sourcemap --target=esnext",
+    "build": "tsup ./index.ts --format esm",
     "check:type": "tsc -p ./tsconfig.json --noEmit",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
