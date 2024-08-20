@@ -18,10 +18,11 @@ export function logReports(
     logReport(`./${relative(root, tsPath)}`, result);
   });
 
+  const unscopedFiles = relativeTsFiles.filter(
+    (v) => !scoped.has(resolve(root, v)),
+  );
+
   if (needsReportUnscoped) {
-    const unscopedFiles = relativeTsFiles.filter(
-      (v) => !scoped.has(resolve(root, v)),
-    );
     console.log(
       [underline("Unscoped Files"), gray(`(${unscopedFiles.length})`)].join(
         " ",
@@ -40,8 +41,18 @@ export function logReports(
     (
       [
         [
+          "Files Checked",
+          [
+            scoped.size,
+            scoped.size === 1 ? "file" : "files",
+            gray(`(${relativeTsFiles.length} found, ${unscopedFiles.length} unscoped)`),
+          ].join(" "),
+        ],
+        [
           "Restricted Imports",
-          `${restrictedImports} ${restrictedImports === 1 ? "line" : "lines"}`,
+          [restrictedImports, restrictedImports === 1 ? "line" : "lines"].join(
+            " ",
+          ),
         ],
         ["Duration", `${end()} ms`],
       ] as const

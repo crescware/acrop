@@ -9,7 +9,7 @@ import { loadGitignore } from "./load-gitignore";
 import { makeAst } from "./make-ast";
 import { logReports, type Report } from "./log-reports";
 
-export async function main(): Promise<void> {
+export async function main(): Promise<boolean> {
   const args = process.argv.slice(2);
 
   const cwd = process.cwd();
@@ -133,4 +133,10 @@ export async function main(): Promise<void> {
   });
 
   logReports(root, reports, relativeTsFiles, needsReportUnscoped, scoped, end);
+
+  const restrictedImports = reports
+    .flatMap((v) => v.result)
+    .filter((v) => !v.isAllowed).length;
+
+  return restrictedImports === 0;
 }
