@@ -6,6 +6,8 @@ import { resolve } from "node:path";
 
 import { config$ } from "./config";
 
+const ext = ".mjs";
+
 export async function importConfig(
   path: string,
 ): Promise<InferOutput<typeof config$>["default"]> {
@@ -20,7 +22,7 @@ export async function importConfig(
   });
   const code = result?.code ?? "";
 
-  const tempConfigPath = resolve(tmpdir(), `acrop-${Date.now()}.js`);
+  const tempConfigPath = resolve(tmpdir(), `acrop-${Date.now()}${ext}`);
   let mod: unknown;
   try {
     writeFileSync(tempConfigPath, code);
