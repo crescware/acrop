@@ -24,7 +24,7 @@ export async function main(): Promise<void> {
   const needsReportUnscoped = args.includes("--report-unscoped");
 
   const config = await importConfig(absolutePath);
-  const root = resolve(cwd, config.root);
+  const root = dirname(absolutePath);
 
   const ig = loadGitignore(root);
   const relativeTsFiles = findTsFiles(root, ig).map(
