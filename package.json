@@ -3,6 +3,9 @@
   "description": "",
   "version": "0.0.1",
   "author": "Crescware Inc.",
+  "bin": {
+    "acrop": "./dist/index.js"
+  },
   "bugs": {
     "url": "https://github.com/crescware/acrop/issues"
   },
