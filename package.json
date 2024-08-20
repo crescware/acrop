@@ -16,6 +16,8 @@
     "detect-newline": "4.0.1",
     "ignore": "5.3.2",
     "minimatch": "10.0.1",
+    "table": "6.8.2",
+    "time-span": "5.1.0",
     "valibot": "0.37.0",
     "yoctocolors": "2.1.1"
   },

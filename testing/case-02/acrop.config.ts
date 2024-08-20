@@ -2,7 +2,7 @@ const config = {
   root: ".",
   scopes: [
     {
-      scope: "./**/*",
+      scope: "./a/**/*",
       allowed: [],
     },
   ],

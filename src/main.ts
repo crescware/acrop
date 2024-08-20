@@ -1,12 +1,13 @@
 import { minimatch } from "minimatch";
 import { dirname, relative, resolve } from "node:path";
+import timeSpan from "time-span";
 
 import { findImportPaths } from "./find-import-paths";
 import { findTsFiles } from "./find-ts-files";
 import { importConfig } from "./import-config";
 import { loadGitignore } from "./load-gitignore";
 import { makeAst } from "./make-ast";
-import { outputReport } from "./output-report";
+import { logReports, type Report } from "./log-reports";
 
 export async function main(): Promise<void> {
   const args = process.argv.slice(2);
@@ -21,10 +22,11 @@ export async function main(): Promise<void> {
     return resolve(cwd, configPath);
   })();
 
-  const needsReportUnscoped = args.includes("--report-unscoped");
+  const needsReportUnscoped = args.includes("--unscoped");
 
+  const end = timeSpan();
   const config = await importConfig(absolutePath);
-  const root = resolve(cwd, config.root);
+  const root = dirname(absolutePath);
 
   const ig = loadGitignore(root);
   const relativeTsFiles = findTsFiles(root, ig).map(
@@ -32,6 +34,7 @@ export async function main(): Promise<void> {
   );
 
   const scoped = new Set<string>();
+  const reports = [] as Report[];
 
   config.scopes.forEach((declaration) => {
     const filteredTsFiles = relativeTsFiles
@@ -55,87 +58,79 @@ export async function main(): Promise<void> {
         },
       );
 
-      const result = infoArray
-        .flatMap((info) => {
-          if (
-            typeof declaration.allowed === "object" &&
-            Array.isArray(declaration.allowed)
-          ) {
-            const allowed = [
-              ...declaration.allowed,
-              (declaration.disallowSiblingImportsUnlessAllow ?? false)
-                ? null
-                : `./${relative(root, dirname(tsPath))}/**/*`,
-            ]
-              .filter((v) => v !== null)
-              // Add a glob pattern that allows the directory itself to include index.ts
-              .flatMap((v) => [v, v.replace(/\/\*\*\/\*$/, "")]);
+      const result = infoArray.flatMap((info) => {
+        if (
+          typeof declaration.allowed === "object" &&
+          Array.isArray(declaration.allowed)
+        ) {
+          const allowed = [
+            ...declaration.allowed,
+            (declaration.disallowSiblingImportsUnlessAllow ?? false)
+              ? null
+              : `./${relative(root, dirname(tsPath))}/**/*`,
+          ]
+            .filter((v) => v !== null)
+            // Add a glob pattern that allows the directory itself to include index.ts
+            .flatMap((v) => [v, v.replace(/\/\*\*\/\*$/, "")]);
 
-            return allowed.reduce(
-              (acc, allowedPath) => {
-                if (minimatch(info.path, allowedPath)) {
-                  acc.isAllowed = true;
-                }
-                return acc;
-              },
-              {
-                path: info.path,
-                isAllowed: false,
-                line: info.line,
-                column: info.column,
-              },
-            );
-          }
+          return allowed.reduce(
+            (acc, allowedPath) => {
+              if (minimatch(info.path, allowedPath)) {
+                acc.isAllowed = true;
+              }
+              return acc;
+            },
+            {
+              path: info.path,
+              isAllowed: false,
+              line: info.line,
+              column: info.column,
+            },
+          );
+        }
 
-          if (
-            typeof declaration.allowed === "function" &&
-            (declaration as any).matchPattern !== undefined &&
-            (declaration as any).matchPattern !== null
-          ) {
-            const pattern = (declaration as any)
-              .matchPattern as unknown as RegExp;
-            const matched = `./${relative(root, dirname(tsPath))}`.match(
-              pattern,
-            );
+        if (
+          typeof declaration.allowed === "function" &&
+          (declaration as any).matchPattern !== undefined &&
+          (declaration as any).matchPattern !== null
+        ) {
+          const pattern = (declaration as any)
+            .matchPattern as unknown as RegExp;
+          const matched = `./${relative(root, dirname(tsPath))}`.match(pattern);
 
-            const allowed = [
-              ...(declaration.allowed(matched) as string[]),
-              (declaration.disallowSiblingImportsUnlessAllow ?? false)
-                ? null
-                : `./${relative(root, dirname(tsPath))}/**/*`,
-            ]
-              .filter((v) => v !== null)
-              // Add a glob pattern that allows the directory itself to include index.ts
-              .flatMap((v) => [v, v.replace(/\/\*\*\/\*$/, "")]);
+          const allowed = [
+            ...(declaration.allowed(matched) as string[]),
+            (declaration.disallowSiblingImportsUnlessAllow ?? false)
+              ? null
+              : `./${relative(root, dirname(tsPath))}/**/*`,
+          ]
+            .filter((v) => v !== null)
+            // Add a glob pattern that allows the directory itself to include index.ts
+            .flatMap((v) => [v, v.replace(/\/\*\*\/\*$/, "")]);
 
-            return allowed.reduce(
-              (acc, allowedPath) => {
-                if (minimatch(info.path, allowedPath)) {
-                  acc.isAllowed = true;
-                }
-                return acc;
-              },
-              {
-                path: info.path,
-                isAllowed: false,
-                line: info.line,
-                column: info.column,
-              },
-            );
-          }
+          return allowed.reduce(
+            (acc, allowedPath) => {
+              if (minimatch(info.path, allowedPath)) {
+                acc.isAllowed = true;
+              }
+              return acc;
+            },
+            {
+              path: info.path,
+              isAllowed: false,
+              line: info.line,
+              column: info.column,
+            },
+          );
+        }
 
-          return [];
-        })
-        .filter((v) => !v.isAllowed);
+        return [];
+      });
 
-      outputReport(`./${relative(root, tsPath)}`, result);
+      reports.push({ tsPath, result });
       scoped.add(tsPath);
     });
   });
 
-  if (needsReportUnscoped) {
-    relativeTsFiles
-      .filter((v) => !scoped.has(resolve(root, v)))
-      .forEach((v) => console.log(v));
-  }
+  logReports(root, reports, relativeTsFiles, needsReportUnscoped, scoped, end);
 }
