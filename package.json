@@ -6,6 +6,19 @@
   "bugs": {
     "url": "https://github.com/crescware/acrop/issues"
   },
+  "dependencies": {
+    "@babel/parser": "7.25.3",
+    "detect-newline": "4.0.1",
+    "ignore": "5.3.2",
+    "minimatch": "10.0.1",
+    "valibot": "0.37.0",
+    "yoctocolors": "2.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "20.16.1",
+    "tsx": "4.17.0",
+    "typescript": "5.5.4"
+  },
   "engines": {
     "node": "20.15.1",
     "npm": "10.7.0"
