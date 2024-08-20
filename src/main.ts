@@ -15,6 +15,9 @@ export async function main(): Promise<void> {
 
   const absolutePath = ((): ReturnType<typeof resolve> => {
     const configPath = args[0] ?? "";
+    if (configPath === "") {
+      throw new Error("Configuration file not found");
+    }
     return resolve(cwd, configPath);
   })();
 
