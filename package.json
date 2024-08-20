@@ -28,6 +28,12 @@
     "node": "20.15.1",
     "npm": "10.7.0"
   },
+  "files": [
+    "dist",
+    "src",
+    "package.json",
+    "README.md"
+  ],
   "homepage": "https://github.com/crescware/acrop#readme",
   "keywords": [],
   "license": "MIT",
