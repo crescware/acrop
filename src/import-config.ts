@@ -1,54 +1,40 @@
-import {
-  array,
-  boolean,
-  custom,
-  flatten,
-  function_,
-  type InferOutput,
-  minLength,
-  optional,
-  pipe,
-  safeParse,
-  strictObject,
-  string,
-  union,
-} from "valibot";
+import { transformFileSync } from "@babel/core";
+import { flatten, type InferOutput, safeParse } from "valibot";
+import { existsSync, unlinkSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { resolve } from "node:path";
 
-const path$ = pipe(string(), minLength(1));
-const glob$ = pipe(string(), minLength(1));
-const regexp$ = custom((v) => v instanceof RegExp);
-
-const scope$ = union([
-  strictObject({
-    scope: glob$,
-    allowed: pipe(array(glob$), minLength(0)),
-    disallowSiblingImportsUnlessAllow: optional(boolean()),
-  }),
-  strictObject({
-    scope: glob$,
-    matchPattern: regexp$,
-    allowed: function_(),
-    disallowSiblingImportsUnlessAllow: optional(boolean()),
-  }),
-]);
-
-const config$ = strictObject({
-  default: strictObject({
-    root: path$,
-    scopes: pipe(array(scope$), minLength(0)),
-  }),
-});
+import { config$ } from "./config";
 
 export async function importConfig(
   path: string,
 ): Promise<InferOutput<typeof config$>["default"]> {
-  const mod = (await import(path)) as unknown;
-  const result = safeParse(config$, mod);
+  if (!existsSync(path)) {
+    throw new Error(`Configuration file not found at: ${path}`);
+  }
 
-  if (!result.success) {
-    console.log(flatten(result.issues));
+  const result = transformFileSync(path, {
+    presets: ["@babel/preset-typescript"],
+    filename: path,
+    sourceMaps: false,
+  });
+  const code = result?.code ?? "";
+
+  const tempConfigPath = resolve(tmpdir(), `acrop-${Date.now()}.js`);
+  let mod: unknown;
+  try {
+    writeFileSync(tempConfigPath, code);
+    mod = (await import(tempConfigPath)) as unknown;
+  } finally {
+    unlinkSync(tempConfigPath);
+  }
+
+  const parseResult = safeParse(config$, mod);
+
+  if (!parseResult.success) {
+    console.log(flatten(parseResult.issues));
     throw new Error();
   }
 
-  return result.output.default;
+  return parseResult.output.default;
 }
