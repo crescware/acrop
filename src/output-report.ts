@@ -1,4 +1,4 @@
-import { underline } from 'yoctocolors';
+import { underline } from "yoctocolors";
 
 type Result = Readonly<{
   path: string;
@@ -17,7 +17,7 @@ export function outputReport(
 
   console.log(underline(targetPath));
   results.forEach((v) => {
-    console.log([[v.line, v.column].join(':'), v.path].join(' '));
+    console.log([[v.line, v.column].join(":"), v.path].join(" "));
   });
-  console.log('');
+  console.log("");
 }

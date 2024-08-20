@@ -1,12 +1,12 @@
-import { minimatch } from 'minimatch';
-import { dirname, relative, resolve } from 'node:path';
+import { minimatch } from "minimatch";
+import { dirname, relative, resolve } from "node:path";
 
-import { findImportPaths } from './find-import-paths';
-import { findTsFiles } from './find-ts-files';
-import { importConfig } from './import-config';
-import { loadGitignore } from './load-gitignore';
-import { makeAst } from './make-ast';
-import { outputReport } from './output-report';
+import { findImportPaths } from "./find-import-paths";
+import { findTsFiles } from "./find-ts-files";
+import { importConfig } from "./import-config";
+import { loadGitignore } from "./load-gitignore";
+import { makeAst } from "./make-ast";
+import { outputReport } from "./output-report";
 
 export async function main(): Promise<void> {
   const args = process.argv.slice(2);
@@ -14,11 +14,11 @@ export async function main(): Promise<void> {
   const cwd = process.cwd();
 
   const absolutePath = ((): ReturnType<typeof resolve> => {
-    const configPath = args[0] ?? '';
+    const configPath = args[0] ?? "";
     return resolve(cwd, configPath);
   })();
 
-  const needsReportUnscoped = args.includes('--report-unscoped');
+  const needsReportUnscoped = args.includes("--report-unscoped");
 
   const config = await importConfig(absolutePath);
   const root = resolve(cwd, config.root);
@@ -55,7 +55,7 @@ export async function main(): Promise<void> {
       const result = infoArray
         .flatMap((info) => {
           if (
-            typeof declaration.allowed === 'object' &&
+            typeof declaration.allowed === "object" &&
             Array.isArray(declaration.allowed)
           ) {
             const allowed = [
@@ -65,8 +65,8 @@ export async function main(): Promise<void> {
                 : `./${relative(root, dirname(tsPath))}/**/*`,
             ]
               .filter((v) => v !== null)
-              // index.ts を許容するためにそのディレクトリ自身も許容する glob を追加
-              .flatMap((v) => [v, v.replace(/\/\*\*\/\*$/, '')]);
+              // Add a glob pattern that allows the directory itself to include index.ts
+              .flatMap((v) => [v, v.replace(/\/\*\*\/\*$/, "")]);
 
             return allowed.reduce(
               (acc, allowedPath) => {
@@ -85,7 +85,7 @@ export async function main(): Promise<void> {
           }
 
           if (
-            typeof declaration.allowed === 'function' &&
+            typeof declaration.allowed === "function" &&
             (declaration as any).matchPattern !== undefined &&
             (declaration as any).matchPattern !== null
           ) {
@@ -102,8 +102,8 @@ export async function main(): Promise<void> {
                 : `./${relative(root, dirname(tsPath))}/**/*`,
             ]
               .filter((v) => v !== null)
-              // index.ts を許容するためにそのディレクトリ自身も許容する glob を追加
-              .flatMap((v) => [v, v.replace(/\/\*\*\/\*$/, '')]);
+              // Add a glob pattern that allows the directory itself to include index.ts
+              .flatMap((v) => [v, v.replace(/\/\*\*\/\*$/, "")]);
 
             return allowed.reduce(
               (acc, allowedPath) => {

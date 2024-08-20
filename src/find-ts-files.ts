@@ -1,6 +1,6 @@
-import type ignore from 'ignore';
-import { readdirSync, statSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import type ignore from "ignore";
+import { readdirSync, statSync } from "node:fs";
+import { join, relative } from "node:path";
 
 export function findTsFiles(
   rootDir: string,
@@ -14,7 +14,7 @@ export function findTsFiles(
     for (const file of files) {
       const fullPath = join(dir, file);
 
-      // .gitignoreにマッチする場合はスキップ
+      // Skip if it matches .gitignore
       if (ig.ignores(relative(rootDir, fullPath))) {
         continue;
       }
@@ -22,7 +22,7 @@ export function findTsFiles(
       const stat = statSync(fullPath);
 
       const isTypeScriptFile =
-        stat.isFile() && (file.endsWith('.ts') || file.endsWith('.tsx'));
+        stat.isFile() && (file.endsWith(".ts") || file.endsWith(".tsx"));
 
       if (stat.isDirectory()) {
         searchDir(fullPath);

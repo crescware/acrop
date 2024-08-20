@@ -12,7 +12,7 @@ import {
   strictObject,
   string,
   union,
-} from 'valibot';
+} from "valibot";
 
 const path$ = pipe(string(), minLength(1));
 const glob$ = pipe(string(), minLength(1));
@@ -41,7 +41,7 @@ const config$ = strictObject({
 
 export async function importConfig(
   path: string,
-): Promise<InferOutput<typeof config$>['default']> {
+): Promise<InferOutput<typeof config$>["default"]> {
   const mod = (await import(path)) as unknown;
   const result = safeParse(config$, mod);
 

@@ -1,4 +1,4 @@
-import { main } from './src';
+import { main } from "./src";
 
 main().catch((e) => {
   console.error(e);
