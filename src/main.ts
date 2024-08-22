@@ -2,12 +2,13 @@ import { minimatch } from "minimatch";
 import { dirname, relative, resolve } from "node:path";
 import timeSpan from "time-span";
 
+import { calcAllowed } from "./calc-allowed";
 import { findImportPaths } from "./find-import-paths";
 import { findTsFiles } from "./find-ts-files";
 import { importConfig } from "./import-config";
 import { loadGitignore } from "./load-gitignore";
+import { ErrorReport, logErrors, logReports, type Report } from "./log-reports";
 import { makeAst } from "./make-ast";
-import { logReports, type Report } from "./log-reports";
 
 export async function main(): Promise<boolean> {
   const args = process.argv.slice(2);
@@ -35,6 +36,7 @@ export async function main(): Promise<boolean> {
 
   const scoped = new Set<string>();
   const reports = [] as Report[];
+  const errorsRef = [] as ErrorReport[];
 
   config.scopes.forEach((declaration) => {
     const filteredTsFiles = relativeTsFiles
@@ -46,7 +48,13 @@ export async function main(): Promise<boolean> {
         return;
       }
 
-      const { ast, positions } = makeAst(tsPath);
+      const makeAstResult = makeAst(tsPath, errorsRef);
+      if (makeAstResult === null) {
+        return;
+      }
+
+      const { ast, positions } = makeAstResult;
+      const allowed = calcAllowed(root, tsPath, declaration);
 
       const infoArray = findImportPaths(ast, positions).map(
         (v): ReturnType<typeof findImportPaths>[number] => {
@@ -58,71 +66,20 @@ export async function main(): Promise<boolean> {
         },
       );
 
-      const result = infoArray.flatMap((info) => {
-        if (
-          typeof declaration.allowed === "object" &&
-          Array.isArray(declaration.allowed)
-        ) {
-          const allowed = [
-            ...declaration.allowed,
-            (declaration.disallowSiblingImportsUnlessAllow ?? false)
-              ? null
-              : `./${relative(root, dirname(tsPath))}/**/*`,
-          ]
-            .filter((v) => v !== null)
-            // Add a glob pattern that allows the directory itself to include index.ts
-            .flatMap((v) => [v, v.replace(/\/\*\*\/\*$/, "")]);
+      const result = infoArray.map((info) => {
+        const isAllowed = allowed.reduce((acc, allowedPath): boolean => {
+          if (acc) {
+            return acc;
+          }
+          return minimatch(info.path, allowedPath);
+        }, false);
 
-          return allowed.reduce(
-            (acc, allowedPath) => {
-              if (minimatch(info.path, allowedPath)) {
-                acc.isAllowed = true;
-              }
-              return acc;
-            },
-            {
-              path: info.path,
-              isAllowed: false,
-              line: info.line,
-              column: info.column,
-            },
-          );
-        }
-
-        if (
-          typeof declaration.allowed === "function" &&
-          (declaration as any).matchPattern !== undefined &&
-          (declaration as any).matchPattern !== null
-        ) {
-          const allowed = [
-            ...(declaration.allowed(
-              `./${relative(root, dirname(tsPath))}`,
-            ) as string[]),
-            (declaration.disallowSiblingImportsUnlessAllow ?? false)
-              ? null
-              : `./${relative(root, dirname(tsPath))}/**/*`,
-          ]
-            .filter((v) => v !== null)
-            // Add a glob pattern that allows the directory itself to include index.ts
-            .flatMap((v) => [v, v.replace(/\/\*\*\/\*$/, "")]);
-
-          return allowed.reduce(
-            (acc, allowedPath) => {
-              if (minimatch(info.path, allowedPath)) {
-                acc.isAllowed = true;
-              }
-              return acc;
-            },
-            {
-              path: info.path,
-              isAllowed: false,
-              line: info.line,
-              column: info.column,
-            },
-          );
-        }
-
-        return [];
+        return {
+          path: info.path,
+          isAllowed,
+          line: info.line,
+          column: info.column,
+        };
       });
 
       reports.push({ tsPath, result });
@@ -130,6 +87,7 @@ export async function main(): Promise<boolean> {
     });
   });
 
+  logErrors(errorsRef);
   logReports(root, reports, relativeTsFiles, needsReportUnscoped, scoped, end);
 
   const restrictedImports = reports

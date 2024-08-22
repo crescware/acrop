@@ -1,8 +1,11 @@
-import { InferOutput } from "valibot";
+import { InferOutput, NonNullable } from "valibot";
 
 import { makeAst } from "./make-ast";
 import { isImportDeclaration, node$ } from "./ast";
 import { calcLineNumber } from "./calc-line-number";
+
+type Ast = NonNullable<ReturnType<typeof makeAst>>["ast"];
+type Positions = NonNullable<ReturnType<typeof makeAst>>["positions"];
 
 type ImportInfo = Readonly<{
   path: string;
@@ -11,17 +14,17 @@ type ImportInfo = Readonly<{
 }>;
 
 export function findImportPaths(
-  ast: ReturnType<typeof makeAst>["ast"],
-  positions_: ReturnType<typeof makeAst>["positions"],
+  ast: Ast,
+  positions_: Positions,
 ): readonly ImportInfo[] {
   const importInfos: ImportInfo[] = [];
 
   function traverse(
     node: InferOutput<typeof node$>,
-    positions: ReturnType<typeof makeAst>["positions"],
+    positions: Positions,
   ): void {
     if (isImportDeclaration(node)) {
-      const { line, column } = calcLineNumber(positions, node.start + 1);
+      const { line, column } = calcLineNumber(positions, node.source.start + 1);
       importInfos.push({
         path: node.source.value,
         line,
