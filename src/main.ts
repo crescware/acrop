@@ -94,12 +94,10 @@ export async function main(): Promise<boolean> {
           (declaration as any).matchPattern !== undefined &&
           (declaration as any).matchPattern !== null
         ) {
-          const pattern = (declaration as any)
-            .matchPattern as unknown as RegExp;
-          const matched = `./${relative(root, dirname(tsPath))}`.match(pattern);
-
           const allowed = [
-            ...(declaration.allowed(matched) as string[]),
+            ...(declaration.allowed(
+              `./${relative(root, dirname(tsPath))}`,
+            ) as string[]),
             (declaration.disallowSiblingImportsUnlessAllow ?? false)
               ? null
               : `./${relative(root, dirname(tsPath))}/**/*`,
