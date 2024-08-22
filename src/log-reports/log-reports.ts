@@ -1,6 +1,6 @@
 import timeSpan from "time-span";
 import { relative, resolve } from "node:path";
-import { gray, underline, yellow } from "yoctocolors";
+import { gray, green, underline, yellow } from "yoctocolors";
 import { getBorderCharacters, table } from "table";
 
 import { logReport } from "./log-report";
@@ -45,7 +45,9 @@ export function logReports(
           [
             scoped.size,
             scoped.size === 1 ? "file" : "files",
-            gray(`(${relativeTsFiles.length} found, ${unscopedFiles.length} unscoped)`),
+            gray(
+              `(${relativeTsFiles.length} found, ${unscopedFiles.length} unscoped)`,
+            ),
           ].join(" "),
         ],
         [
@@ -56,7 +58,10 @@ export function logReports(
         ],
         ["Duration", `${end()} ms`],
       ] as const
-    ).map(([header, value]) => [gray(header), yellow(value)]),
+    ).map(([header, value]) => [
+      gray(header),
+      restrictedImports === 0 ? green(value) : yellow(value),
+    ]),
     {
       border: getBorderCharacters("void"),
       columnDefault: {
