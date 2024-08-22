@@ -10,28 +10,28 @@
     "url": "https://github.com/crescware/acrop/issues"
   },
   "dependencies": {
-    "@babel/core": "7.25.2",
-    "@babel/parser": "7.25.3",
-    "@babel/preset-typescript": "7.24.7",
-    "detect-newline": "4.0.1",
-    "ignore": "5.3.2",
-    "minimatch": "10.0.1",
-    "table": "6.8.2",
-    "time-span": "5.1.0",
-    "valibot": "0.37.0",
-    "yoctocolors": "2.1.1"
+    "@babel/core": "~7.25.2",
+    "@babel/parser": "~7.25.3",
+    "@babel/preset-typescript": "~7.24.7",
+    "detect-newline": "~4.0.1",
+    "ignore": "~5.3.2",
+    "minimatch": "~10.0.1",
+    "table": "~6.8.2",
+    "time-span": "~5.1.0",
+    "valibot": "~0.37.0",
+    "yoctocolors": "~2.1.1"
   },
   "devDependencies": {
-    "@types/babel__core": "7.20.5",
-    "@types/node": "20.16.1",
-    "prettier": "3.3.3",
+    "@types/babel__core": "~7.20.5",
+    "@types/node": "~20.16.1",
+    "prettier": "~3.3.3",
     "tsup": "8.2.4",
-    "tsx": "4.17.0",
+    "tsx": "~4.17.0",
     "typescript": "5.5.4"
   },
   "engines": {
-    "node": "20.15.1",
-    "npm": "10.7.0"
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
   },
   "files": [
     "dist",
