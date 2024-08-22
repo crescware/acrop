@@ -1,17 +1,21 @@
-import { parse } from "@babel/parser";
+import { parseSync } from "oxc-parser";
 import { readFileSync } from "node:fs";
-import { extname } from "node:path";
+import { InferOutput, parse } from "valibot";
 
-type Plugins = NonNullable<Parameters<typeof parse>[1]>["plugins"];
+import { ast$ } from "./ast";
+import { getLineStartPositions } from "./get-line-start-positions";
 
-export function makeAst(path: string): ReturnType<typeof parse> {
+type Return = Readonly<{
+  ast: InferOutput<typeof ast$>;
+  positions: ReturnType<typeof getLineStartPositions>;
+}>;
+
+export function makeAst(path: string): Return {
   const code = readFileSync(path, "utf-8");
-  const ext = extname(path);
+  const result = parseSync(code, { sourceType: "module" });
+  const ast = JSON.parse(result.program);
 
-  const basePlugins = ["typescript"] as const satisfies Plugins;
+  const positions = getLineStartPositions(code);
 
-  return parse(code, {
-    sourceType: "module",
-    plugins: ext === ".tsx" ? [...basePlugins, "jsx"] : basePlugins,
-  });
+  return { ast: parse(ast$, ast), positions };
 }

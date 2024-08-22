@@ -46,9 +46,9 @@ export async function main(): Promise<boolean> {
         return;
       }
 
-      const ast = makeAst(tsPath);
+      const { ast, positions } = makeAst(tsPath);
 
-      const infoArray = findImportPaths(ast).map(
+      const infoArray = findImportPaths(ast, positions).map(
         (v): ReturnType<typeof findImportPaths>[number] => {
           return {
             path: `./${relative(root, resolve(dirname(tsPath), v.path))}`,
