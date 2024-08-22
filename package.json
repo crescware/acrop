@@ -50,7 +50,7 @@
     "url": "git+https://github.com/crescware/acrop.git"
   },
   "scripts": {
-    "build": "tsup ./index.ts  --format esm && echo '#!/usr/bin/env node' | cat - dist/index.js > dist/index.mjs && rm dist/index.js",
+    "build": "npm run test -- run && tsup ./index.ts  --format esm && echo '#!/usr/bin/env node' | cat - dist/index.js > dist/index.mjs && rm dist/index.js",
     "check:type": "tsc -p ./tsconfig.json --noEmit",
     "start": "tsx ./index.ts",
     "test": "vitest"
