@@ -8,10 +8,16 @@ export function buildNodesFromErrors(
     return {
       type: "text",
       elements: [
-        { text: report.path, attributes: [{ type: "color", value: "red" }] },
+        {
+          text: report.path,
+          attributes: [{ type: "color", value: "red" }],
+        },
       ],
       children: report.errors.map((line): TextNode => {
-        return { type: "text", elements: [{ text: line }] };
+        return {
+          type: "text",
+          elements: [{ text: line }],
+        };
       }),
     };
   });
