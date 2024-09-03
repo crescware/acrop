@@ -1,0 +1,119 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Case 01 > main() > should match the generated log output structure against the snapshot 1`] = `
+{
+  "nodes": [
+    {
+      "alignment": [
+        "right",
+        "left",
+      ],
+      "rows": [
+        [
+          {
+            "elements": [
+              {
+                "attributes": [
+                  {
+                    "type": "color",
+                    "value": "gray",
+                  },
+                ],
+                "text": "Files Checked",
+              },
+            ],
+            "type": "text",
+          },
+          {
+            "elements": [
+              {
+                "attributes": [
+                  {
+                    "type": "color",
+                    "value": "green",
+                  },
+                ],
+                "text": "3 files",
+              },
+              {
+                "text": " ",
+              },
+              {
+                "attributes": [
+                  {
+                    "type": "color",
+                    "value": "gray",
+                  },
+                ],
+                "text": "(6 found, 3 unscoped)",
+              },
+            ],
+            "type": "text",
+          },
+        ],
+        [
+          {
+            "elements": [
+              {
+                "attributes": [
+                  {
+                    "type": "color",
+                    "value": "gray",
+                  },
+                ],
+                "text": "Restricted Imports",
+              },
+            ],
+            "type": "text",
+          },
+          {
+            "elements": [
+              {
+                "attributes": [
+                  {
+                    "type": "color",
+                    "value": "green",
+                  },
+                ],
+                "text": "0 lines",
+              },
+            ],
+            "type": "text",
+          },
+        ],
+        [
+          {
+            "elements": [
+              {
+                "attributes": [
+                  {
+                    "type": "color",
+                    "value": "gray",
+                  },
+                ],
+                "text": "Duration",
+              },
+            ],
+            "type": "text",
+          },
+          {
+            "elements": [
+              {
+                "attributes": [
+                  {
+                    "type": "color",
+                    "value": "green",
+                  },
+                ],
+                "text": "1.23 sec",
+              },
+            ],
+            "type": "text",
+          },
+        ],
+      ],
+      "type": "table",
+    },
+  ],
+}
+`;
