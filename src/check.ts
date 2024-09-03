@@ -60,7 +60,10 @@ export function check(
         };
       });
 
-      reports.push({ tsPath, result });
+      reports.push({
+        tsPath: { relative: relative(root, tsPath), absolute: tsPath },
+        result,
+      });
       scoped.add(tsPath);
     });
   });

@@ -1,5 +1,4 @@
 import { dirname, relative, resolve } from "node:path";
-import timeSpan from "time-span";
 
 import { findTsFiles } from "./find-ts-files";
 import { importConfig } from "./import-config";
@@ -8,9 +7,10 @@ import { outputFromTree } from "./log-reports";
 import { type ErrorReport } from "./error-report";
 import { check } from "./check";
 import { buildTree, type Report } from "./log-tree";
+import { ownedTimeSpan } from "./owned-time-span";
 
 export async function main(): Promise<boolean> {
-  const end = timeSpan();
+  const end = ownedTimeSpan();
 
   const args = process.argv.slice(2);
   const cwd = process.cwd();

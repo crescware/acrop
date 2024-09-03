@@ -32,7 +32,7 @@ export function buildSummaryReportNode(
               })(),
               attributes: columnAttributes,
             },
-            { text: " ", attributes: columnAttributes },
+            { text: " " },
             {
               text: `(${relativeTsFiles.length} found, ${unscopedFilesCount} unscoped)`,
               attributes: [{ type: "color", value: "gray" }],
@@ -69,7 +69,7 @@ export function buildSummaryReportNode(
         },
         {
           type: "text",
-          elements: [{ text: `${duration} ms`, attributes: columnAttributes }],
+          elements: [{ text: `${duration} sec`, attributes: columnAttributes }],
         },
       ],
     ],

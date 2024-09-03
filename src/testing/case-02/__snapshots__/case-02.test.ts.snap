@@ -1,0 +1,182 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Case 02 > main() > should match the generated log output structure against the snapshot 1`] = `
+{
+  "nodes": [
+    {
+      "elements": [
+        {
+          "attributes": [
+            {
+              "type": "modifier",
+              "value": "underline",
+            },
+            {
+              "type": "color",
+              "value": "gray",
+            },
+          ],
+          "text": "./a/a1.ts",
+        },
+        {
+          "text": " ",
+        },
+        {
+          "attributes": [
+            {
+              "type": "color",
+              "value": "gray",
+            },
+          ],
+          "text": "(1)",
+        },
+      ],
+      "type": "text",
+    },
+    {
+      "alignment": [
+        "left",
+        "left",
+      ],
+      "rows": [
+        [
+          {
+            "elements": [
+              {
+                "attributes": [
+                  {
+                    "type": "color",
+                    "value": "gray",
+                  },
+                ],
+                "text": "2:20",
+              },
+            ],
+            "type": "text",
+          },
+          {
+            "elements": [
+              {
+                "text": "./b/b1",
+              },
+            ],
+            "type": "text",
+          },
+        ],
+      ],
+      "type": "table",
+    },
+    {
+      "alignment": [
+        "right",
+        "left",
+      ],
+      "rows": [
+        [
+          {
+            "elements": [
+              {
+                "attributes": [
+                  {
+                    "type": "color",
+                    "value": "gray",
+                  },
+                ],
+                "text": "Files Checked",
+              },
+            ],
+            "type": "text",
+          },
+          {
+            "elements": [
+              {
+                "attributes": [
+                  {
+                    "type": "color",
+                    "value": "yellow",
+                  },
+                ],
+                "text": "3 files",
+              },
+              {
+                "text": " ",
+              },
+              {
+                "attributes": [
+                  {
+                    "type": "color",
+                    "value": "gray",
+                  },
+                ],
+                "text": "(6 found, 3 unscoped)",
+              },
+            ],
+            "type": "text",
+          },
+        ],
+        [
+          {
+            "elements": [
+              {
+                "attributes": [
+                  {
+                    "type": "color",
+                    "value": "gray",
+                  },
+                ],
+                "text": "Restricted Imports",
+              },
+            ],
+            "type": "text",
+          },
+          {
+            "elements": [
+              {
+                "attributes": [
+                  {
+                    "type": "color",
+                    "value": "yellow",
+                  },
+                ],
+                "text": "1 line",
+              },
+            ],
+            "type": "text",
+          },
+        ],
+        [
+          {
+            "elements": [
+              {
+                "attributes": [
+                  {
+                    "type": "color",
+                    "value": "gray",
+                  },
+                ],
+                "text": "Duration",
+              },
+            ],
+            "type": "text",
+          },
+          {
+            "elements": [
+              {
+                "attributes": [
+                  {
+                    "type": "color",
+                    "value": "yellow",
+                  },
+                ],
+                "text": "1.23 sec",
+              },
+            ],
+            "type": "text",
+          },
+        ],
+      ],
+      "type": "table",
+    },
+  ],
+}
+`;

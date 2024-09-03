@@ -22,7 +22,11 @@ export async function importConfig(
   });
   const code = result?.code ?? "";
 
-  const tempConfigPath = resolve(tmpdir(), `acrop-${Date.now()}${ext}`);
+  const tempConfigPath = resolve(
+    tmpdir(),
+    `acrop-${crypto.randomUUID()}${ext}`,
+  );
+
   let mod: unknown;
   try {
     writeFileSync(tempConfigPath, code);

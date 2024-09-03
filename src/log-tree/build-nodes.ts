@@ -9,7 +9,7 @@ import { LogNode } from "./log-tree";
 export function buildNodes(
   errorsRef: Parameters<typeof buildNodesFromErrors>[0],
   reports: Parameters<typeof buildReportNodes>[0],
-  root: Parameters<typeof buildReportNodes>[1],
+  root: string,
   relativeTsFiles: Parameters<typeof buildSummaryReportNode>[0],
   scoped: Parameters<typeof buildSummaryReportNode>[1],
   needsReportUnscoped: Parameters<typeof buildUnscopedReportNode>[0],
@@ -17,7 +17,7 @@ export function buildNodes(
   restrictedImports: Parameters<typeof buildSummaryReportNode>[3],
 ): readonly LogNode[] {
   const errorsNodes = buildNodesFromErrors(errorsRef);
-  const reportNodes = buildReportNodes(reports, root);
+  const reportNodes = buildReportNodes(reports);
 
   const unscopedFiles = relativeTsFiles.filter(
     (v) => !scoped.has(resolve(root, v)),
