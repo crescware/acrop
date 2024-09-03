@@ -1,4 +1,4 @@
-import { TableNode } from "./log-node";
+import { TableNode } from "./log-tree";
 
 export function buildSummaryReportNode(
   relativeTsFiles: readonly string[],

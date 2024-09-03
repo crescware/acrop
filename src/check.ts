@@ -2,11 +2,11 @@ import { minimatch } from "minimatch";
 import { dirname, relative, resolve } from "node:path";
 
 import { importConfig } from "./import-config";
-import { ErrorReport } from "./error-report";
-import { type Report } from "./log-reports";
+import { type ErrorReport } from "./error-report";
 import { makeAst } from "./make-ast";
 import { calcAllowed } from "./calc-allowed";
 import { findImportPaths } from "./find-import-paths";
+import { type Report } from "./log-tree";
 
 export function check(
   config: Awaited<ReturnType<typeof importConfig>>,

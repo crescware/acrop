@@ -1,14 +1,18 @@
 import { relative } from "node:path";
 
-import { type Report } from "../log-reports";
-import { LogNode, TextNode } from "./log-node";
+import { LogNode, TextNode } from "./log-tree";
 import { buildNodeFromResults } from "./build-node-from-results";
+import { type Report } from "./report";
 
-export function buildReportNodes(reports: readonly Report[], root: string) {
+export function buildReportNodes(
+  reports: readonly Report[],
+  root: string,
+): readonly LogNode[] {
   return reports
     .flatMap(({ tsPath, result }): readonly LogNode[] => {
       const targetPath = `./${relative(root, tsPath)}`;
       const restrictedCount = result.filter((v) => !v.isAllowed).length;
+
       const textNode = {
         type: "text",
         elements: [
@@ -28,12 +32,10 @@ export function buildReportNodes(reports: readonly Report[], root: string) {
           },
         ],
       } satisfies TextNode;
+
       const tableNode = buildNodeFromResults(result);
 
-      if (tableNode === null) {
-        return [];
-      }
-      return [textNode, tableNode];
+      return tableNode === null ? [] : [textNode, tableNode];
     })
     .filter((v) => v !== null);
 }

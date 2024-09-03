@@ -1,4 +1,4 @@
-import { TextNode } from "./log-node";
+import { TextNode } from "./log-tree";
 
 export function buildUnscopedReportNode(
   needsReportUnscoped: boolean,

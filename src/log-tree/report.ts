@@ -1,4 +1,4 @@
-import { buildNodeFromResults } from "../log-tree/build-node-from-results";
+import { buildNodeFromResults } from "./build-node-from-results";
 
 export type Report = Readonly<{
   tsPath: string;

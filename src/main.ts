@@ -4,16 +4,18 @@ import timeSpan from "time-span";
 import { findTsFiles } from "./find-ts-files";
 import { importConfig } from "./import-config";
 import { loadGitignore } from "./load-gitignore";
-import { logReports, type Report } from "./log-reports";
-import { ErrorReport } from "./error-report";
-import { buildNodes } from "./log-tree/build-nodes";
+import { outputFromTree } from "./log-reports";
+import { type ErrorReport } from "./error-report";
 import { check } from "./check";
+import { buildTree, type Report } from "./log-tree";
 
 export async function main(): Promise<boolean> {
   const end = timeSpan();
-  const args = process.argv.slice(2);
 
+  const args = process.argv.slice(2);
   const cwd = process.cwd();
+
+  const needsReportUnscoped = args.includes("--unscoped");
 
   const absolutePath = ((): ReturnType<typeof resolve> => {
     const configPath = args[0] ?? "";
@@ -23,20 +25,18 @@ export async function main(): Promise<boolean> {
     return resolve(cwd, configPath);
   })();
 
-  const needsReportUnscoped = args.includes("--unscoped");
+  const config = await importConfig(absolutePath);
 
   const root = dirname(absolutePath);
-
   const relativeTsFiles = ((): readonly string[] => {
     const ig = loadGitignore(root);
     return findTsFiles(root, ig).map((v) => `./${relative(root, v)}`);
   })();
 
   const scoped = new Set<string>();
-  const reports = [] as Report[];
   const errorsRef = [] as ErrorReport[];
+  const reports = [] as Report[];
 
-  const config = await importConfig(absolutePath);
   check(config, relativeTsFiles, root, scoped, errorsRef, reports);
 
   const duration = end();
@@ -45,18 +45,18 @@ export async function main(): Promise<boolean> {
     .flatMap((v) => v.result)
     .filter((v) => !v.isAllowed).length;
 
-  const nodes = buildNodes(
-    errorsRef,
-    reports,
-    root,
-    relativeTsFiles,
-    scoped,
-    needsReportUnscoped,
-    duration,
-    restrictedImports,
+  outputFromTree(
+    buildTree(
+      errorsRef,
+      reports,
+      root,
+      relativeTsFiles,
+      scoped,
+      needsReportUnscoped,
+      duration,
+      restrictedImports,
+    ),
   );
-
-  logReports(nodes);
 
   return restrictedImports === 0;
 }

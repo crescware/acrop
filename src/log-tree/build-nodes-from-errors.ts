@@ -1,5 +1,5 @@
 import { ErrorReport } from "../error-report";
-import { TextNode } from "./log-node";
+import { TextNode } from "./log-tree";
 
 export function buildNodesFromErrors(
   reports: readonly ErrorReport[],

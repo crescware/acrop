@@ -1,6 +1,6 @@
 import { getBorderCharacters, table } from "table";
 
-import { TableNode } from "../log-tree/log-node";
+import { TableNode } from "../log-tree/log-tree";
 import { makeFromTextNode } from "./make-from-text-node";
 
 export function makeTableLines(node: TableNode): string {

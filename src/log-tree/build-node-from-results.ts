@@ -1,5 +1,5 @@
-import { type Result } from "../log-reports/result";
-import { TableNode } from "./log-node";
+import { type Result } from "./result";
+import { TableNode } from "./log-tree";
 
 export function buildNodeFromResults(
   results: readonly Result[],

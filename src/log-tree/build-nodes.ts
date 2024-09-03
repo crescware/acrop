@@ -4,7 +4,7 @@ import { buildNodesFromErrors } from "./build-nodes-from-errors";
 import { buildReportNodes } from "./build-report-nodes";
 import { buildSummaryReportNode } from "./build-summary-report-node";
 import { buildUnscopedReportNode } from "./build-unscoped-report-node";
-import { LogNode } from "./log-node";
+import { LogNode } from "./log-tree";
 
 export function buildNodes(
   errorsRef: Parameters<typeof buildNodesFromErrors>[0],

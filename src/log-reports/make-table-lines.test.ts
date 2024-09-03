@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { gray } from "yoctocolors";
 
-import { TableNode } from "../log-tree/log-node";
+import { TableNode } from "../log-tree/log-tree";
 import { makeTableLines } from "./make-table-lines";
 
 type Case = Readonly<{

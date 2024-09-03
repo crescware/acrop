@@ -1,9 +1,9 @@
-import { LogNode } from "../log-tree/log-node";
+import { LogTree } from "../log-tree";
 import { makeTableLines } from "./make-table-lines";
 import { makeFromTextNode } from "./make-from-text-node";
 
-export function logReports(nodes: readonly LogNode[]): void {
-  [...nodes]
+export function outputFromTree(tree: LogTree): void {
+  tree.nodes
     .map((node) => {
       if (node.type === "text") {
         return makeFromTextNode(node);

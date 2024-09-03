@@ -1,6 +1,6 @@
 import { gray, green, red, underline, yellow } from "yoctocolors";
 
-import { TextElement } from "../log-tree/log-node";
+import { TextElement } from "../log-tree/log-tree";
 
 export function makeFromTextElement(el: TextElement) {
   return (el.attributes ?? []).reduce((acc, attr) => {

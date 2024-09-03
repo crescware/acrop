@@ -28,3 +28,7 @@ export type TableNode = Readonly<{
 }>;
 
 export type LogNode = TextNode | TableNode;
+
+export type LogTree = Readonly<{
+  nodes: readonly LogNode[]
+}>
