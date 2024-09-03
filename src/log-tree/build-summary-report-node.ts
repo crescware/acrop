@@ -1,7 +1,12 @@
 import { TableNode } from "./log-tree";
 
+type TsFiles = readonly Readonly<{
+  relative: string;
+  absolute: string;
+}>[];
+
 export function buildSummaryReportNode(
-  relativeTsFiles: readonly string[],
+  tsFiles: TsFiles,
   scoped: Set<string>,
   duration: number,
   restrictedImports: number,
@@ -34,7 +39,7 @@ export function buildSummaryReportNode(
             },
             { text: " " },
             {
-              text: `(${relativeTsFiles.length} found, ${unscopedFilesCount} unscoped)`,
+              text: `(${tsFiles.length} found, ${unscopedFilesCount} unscoped)`,
               attributes: [{ type: "color", value: "gray" }],
             },
           ],

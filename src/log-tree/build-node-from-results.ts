@@ -4,8 +4,6 @@ import { TableNode } from "./log-tree";
 export function buildNodeFromResults(
   filtered: readonly Result[],
 ): TableNode | null {
-
-
   if (filtered.length === 0) {
     return null;
   }
@@ -23,7 +21,7 @@ export function buildNodeFromResults(
             },
           ],
         },
-        { type: "text", elements: [{ text: v.path }] },
+        { type: "text", elements: [{ text: v.path.relative }] },
       ];
     }),
     alignment: ["left", "left"],

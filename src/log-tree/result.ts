@@ -1,5 +1,7 @@
 export type Result = Readonly<{
-  path: string;
+  path: Readonly<{
+    relative: string;
+  }>;
   line: number;
   column: number;
   isAllowed: boolean;

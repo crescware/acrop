@@ -1,9 +1,14 @@
 import { TextNode } from "./log-tree";
 
+type UnscopedFiles = readonly Readonly<{
+  relative: string;
+  absolute: string;
+}>[];
+
 export function buildUnscopedReportNode(
   needsReportUnscoped: boolean,
   unscopedFilesCount: number,
-  unscopedFiles: readonly string[],
+  unscopedFiles: UnscopedFiles,
 ): readonly TextNode[] {
   return needsReportUnscoped
     ? ([
@@ -25,7 +30,7 @@ export function buildUnscopedReportNode(
         ...unscopedFiles.map((v): TextNode => {
           return {
             type: "text",
-            elements: [{ text: v }],
+            elements: [{ text: v.relative }],
           };
         }),
         { type: "text", elements: [{ text: " " }] },
