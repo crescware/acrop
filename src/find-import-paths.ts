@@ -8,7 +8,9 @@ type Ast = NonNullable<ReturnType<typeof makeAst>>["ast"];
 type Positions = NonNullable<ReturnType<typeof makeAst>>["positions"];
 
 type ImportInfo = Readonly<{
-  path: string;
+  path: Readonly<{
+    relative: string;
+  }>;
   line: number;
   column: number;
 }>;
@@ -26,7 +28,7 @@ export function findImportPaths(
     if (isImportDeclaration(node)) {
       const { line, column } = calcLineNumber(positions, node.source.start + 1);
       importInfos.push({
-        path: node.source.value,
+        path: { relative: node.source.value },
         line,
         column,
       });

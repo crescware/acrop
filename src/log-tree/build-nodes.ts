@@ -1,5 +1,3 @@
-import { resolve } from "node:path";
-
 import { buildNodesFromErrors } from "./build-nodes-from-errors";
 import { buildReportNodes } from "./build-report-nodes";
 import { buildSummaryReportNode } from "./build-summary-report-node";
@@ -9,8 +7,7 @@ import { LogNode } from "./log-tree";
 export function buildNodes(
   errorsRef: Parameters<typeof buildNodesFromErrors>[0],
   reports: Parameters<typeof buildReportNodes>[0],
-  root: string,
-  relativeTsFiles: Parameters<typeof buildSummaryReportNode>[0],
+  tsFiles: Parameters<typeof buildSummaryReportNode>[0],
   scoped: Parameters<typeof buildSummaryReportNode>[1],
   needsReportUnscoped: Parameters<typeof buildUnscopedReportNode>[0],
   duration: Parameters<typeof buildSummaryReportNode>[2],
@@ -19,9 +16,7 @@ export function buildNodes(
   const errorsNodes = buildNodesFromErrors(errorsRef);
   const reportNodes = buildReportNodes(reports);
 
-  const unscopedFiles = relativeTsFiles.filter(
-    (v) => !scoped.has(resolve(root, v)),
-  );
+  const unscopedFiles = tsFiles.filter((v) => !scoped.has(v.absolute));
 
   const unscopedFilesCount = unscopedFiles.length;
 
@@ -32,7 +27,7 @@ export function buildNodes(
   );
 
   const summaryReportNode = buildSummaryReportNode(
-    relativeTsFiles,
+    tsFiles,
     scoped,
     duration,
     restrictedImports,

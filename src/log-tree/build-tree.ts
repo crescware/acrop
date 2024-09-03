@@ -4,19 +4,17 @@ import { buildNodes } from "./build-nodes";
 export function buildTree(
   errorsRef: Parameters<typeof buildNodes>[0],
   reports: Parameters<typeof buildNodes>[1],
-  root: Parameters<typeof buildNodes>[2],
-  relativeTsFiles: Parameters<typeof buildNodes>[3],
-  scoped: Parameters<typeof buildNodes>[4],
-  needsReportUnscoped: Parameters<typeof buildNodes>[5],
-  duration: Parameters<typeof buildNodes>[6],
-  restrictedImports: Parameters<typeof buildNodes>[7],
+  tsFiles: Parameters<typeof buildNodes>[2],
+  scoped: Parameters<typeof buildNodes>[3],
+  needsReportUnscoped: Parameters<typeof buildNodes>[4],
+  duration: Parameters<typeof buildNodes>[5],
+  restrictedImports: Parameters<typeof buildNodes>[6],
 ): LogTree {
   return {
     nodes: buildNodes(
       errorsRef,
       reports,
-      root,
-      relativeTsFiles,
+      tsFiles,
       scoped,
       needsReportUnscoped,
       duration,

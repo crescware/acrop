@@ -7,49 +7,67 @@ import { makeAst } from "./make-ast";
 import { calcAllowed } from "./calc-allowed";
 import { findImportPaths } from "./find-import-paths";
 import { type Report } from "./log-tree";
+import { VerboseLogger } from "./verbose-logger";
 
 export function check(
+  logger: VerboseLogger,
   config: Awaited<ReturnType<typeof importConfig>>,
-  relativeTsFiles: readonly string[],
+  tsFiles: readonly { relative: string; absolute: string }[],
   root: string,
   scoped: Set<string>,
   errorsRef: /* readwrite */ ErrorReport[],
   reports: /* readwrite */ Report[],
 ) {
+  const end1 = logger.startWithHeader("Check files");
+
   config.scopes.forEach((declaration) => {
-    const filteredTsFiles = relativeTsFiles
-      .filter((tsFile) => minimatch(tsFile, declaration.scope))
-      .map((v) => resolve(root, v));
+    const end2 = logger.start(`> "${declaration.scope}" Matched file in scope`);
 
-    filteredTsFiles.forEach((tsPath) => {
-      if (scoped.has(tsPath)) {
+    const filtered = tsFiles.filter((tsFile) => {
+      const end3 = logger.start(`> > "${tsFile.relative}" Match file`);
+      if (scoped.has(tsFile.absolute)) {
+        end3();
         return;
       }
+      const ret = minimatch(tsFile.relative, declaration.scope);
+      end3();
+      return ret;
+    });
 
-      const makeAstResult = makeAst(tsPath, errorsRef);
+    end2();
+
+    filtered.forEach((path) => {
+      const end4 = logger.start(`> > "${path.relative}" Make ast`);
+
+      const makeAstResult = makeAst(path.absolute, errorsRef);
       if (makeAstResult === null) {
+        end4();
         return;
       }
+      end4();
 
       const { ast, positions } = makeAstResult;
-      const allowed = calcAllowed(root, tsPath, declaration);
+      const allowed = calcAllowed(root, path.absolute, declaration);
 
+      const end5 = logger.start(`> > "${path.relative}" Find import paths`);
       const infoArray = findImportPaths(ast, positions).map(
         (v): ReturnType<typeof findImportPaths>[number] => {
+          const relativePath = `./${relative(root, resolve(dirname(path.absolute), v.path.relative))}`;
           return {
-            path: `./${relative(root, resolve(dirname(tsPath), v.path))}`,
+            path: { relative: relativePath },
             line: v.line,
             column: v.column,
           };
         },
       );
+      end5();
 
       const result = infoArray.map((info) => {
         const isAllowed = allowed.reduce((acc, allowedPath): boolean => {
           if (acc) {
             return acc;
           }
-          return minimatch(info.path, allowedPath);
+          return minimatch(info.path.relative, allowedPath);
         }, false);
 
         return {
@@ -60,11 +78,9 @@ export function check(
         };
       });
 
-      reports.push({
-        tsPath: { relative: relative(root, tsPath), absolute: tsPath },
-        result,
-      });
-      scoped.add(tsPath);
+      reports.push({ path, result });
+      scoped.add(path.absolute);
     });
   });
+  end1();
 }

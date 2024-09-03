@@ -5,15 +5,14 @@ import { type Report } from "./report";
 export function buildReportNodes(
   reports: readonly Report[],
 ): readonly LogNode[] {
-  return reports.flatMap(({ tsPath, result }): readonly LogNode[] => {
-    const targetPath = `./${tsPath.relative}`;
+  return reports.flatMap(({ path, result }): readonly LogNode[] => {
     const restricted = result.filter((v) => !v.isAllowed);
 
     const textNode = {
       type: "text",
       elements: [
         {
-          text: targetPath,
+          text: path.relative,
           attributes: [
             { type: "modifier", value: "underline" },
             { type: "color", value: "gray" },
