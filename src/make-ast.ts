@@ -24,8 +24,7 @@ export function makeAst(path: string, errorsRef: unknown[]): Return {
     return null;
   }
 
-  const ast = JSON.parse(result.program);
   const positions = getLineStartPositions(code);
 
-  return { ast: parse(ast$, ast), positions };
+  return { ast: parse(ast$, result.program), positions };
 }
