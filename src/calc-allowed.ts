@@ -8,21 +8,18 @@ type Declaration = Awaited<ReturnType<typeof importConfig>>["scopes"][number];
 export function calcAllowed(
 	root: string,
 	tsPath: string,
-	declaration_: Declaration,
+	declaration: Declaration,
 ): readonly string[] {
 	const base = ((): readonly string[] => {
-		const declaration = declaration_.rules[0] ?? null;
-		assertExists(declaration);
+		const rule = declaration.rules[0] ?? null;
+		assertExists(rule);
 
-		if (
-			typeof declaration.allowed === "object" &&
-			Array.isArray(declaration.allowed)
-		) {
-			return declaration.allowed;
+		if (typeof rule.allowed === "object" && Array.isArray(rule.allowed)) {
+			return rule.allowed;
 		}
 
-		if (typeof declaration.allowed === "function") {
-			return declaration.allowed(`./${relative(root, tsPath)}`) as string[];
+		if (typeof rule.allowed === "function") {
+			return rule.allowed(`./${relative(root, tsPath)}`) as string[];
 		}
 
 		throw new Error(
@@ -33,7 +30,7 @@ export function calcAllowed(
 	return (
 		[
 			...base,
-			(declaration_.disallowSiblingImportsUnlessAllow ?? false)
+			(declaration.disallowSiblingImportsUnlessAllow ?? false)
 				? null
 				: `./${relative(root, dirname(tsPath))}/**/*`,
 		]
