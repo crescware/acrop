@@ -1,5 +1,6 @@
 import {
 	array,
+	boolean,
 	function_,
 	minLength,
 	pipe,
@@ -17,6 +18,9 @@ const rule$ = union([
 	}),
 	strictObject({
 		restricted: union([pipe(array(glob$), minLength(0)), function_()]),
+	}),
+	strictObject({
+		sibling: boolean(),
 	}),
 ]);
 
