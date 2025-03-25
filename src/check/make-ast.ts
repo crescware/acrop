@@ -3,8 +3,8 @@ import { basename } from "node:path";
 import { parseSync } from "oxc-parser";
 import { type InferOutput, parse } from "valibot";
 
+import { getLineStartPositions } from "../get-line-start-positions";
 import { ast$ } from "./ast";
-import { getLineStartPositions } from "./get-line-start-positions";
 
 type Return = Readonly<{
 	ast: InferOutput<typeof ast$>;

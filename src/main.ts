@@ -1,62 +1,14 @@
-import { dirname, relative, resolve } from "node:path";
+import { dirname } from "node:path";
 
-import { check } from "./check";
-import { findTsFiles } from "./find-ts-files";
+import { calcConfigAbsolutePath } from "./calc-config-absolute-path";
+import { check } from "./check/check";
+import { extractCliConfig } from "./extract-cli-config";
+import { getAllTsFiles } from "./get-all-ts-files";
 import { importConfig } from "./import-config";
-import { loadGitignore } from "./load-gitignore";
 import { outputFromTree } from "./log-reports";
 import { buildTree } from "./log-tree";
 import { ownedTimeSpan } from "./owned-time-span";
 import { VerboseLogger } from "./verbose-logger";
-
-type CliConfig = Readonly<{
-	needsReportUnscoped: boolean;
-	verbose: boolean;
-	configPath: string;
-}>;
-
-function extractCliConfig(): CliConfig {
-	const args = process.argv.slice(2);
-
-	const needsReportUnscoped = args.includes("--unscoped");
-	const verbose = args.includes("--verbose");
-
-	const configPath = args[0] ?? "";
-	if (configPath === "") {
-		throw new Error("Configuration file not found");
-	}
-
-	return { needsReportUnscoped, verbose, configPath };
-}
-
-function calcConfigAbsolutePath(
-	logger: VerboseLogger,
-	configPath: string,
-): ReturnType<typeof resolve> {
-	const end_ = logger.start("Resolve config path");
-	const cwd = process.cwd();
-	const ret = resolve(cwd, configPath);
-	end_();
-	return ret;
-}
-
-function getAllTsFiles(
-	logger: VerboseLogger,
-	root: string,
-): readonly { relative: string; absolute: string }[] {
-	const end = logger.start("Find TypeScript files");
-
-	const tsFiles = ((): readonly string[] => {
-		const ig = loadGitignore(root);
-		return findTsFiles(root, ig);
-	})().map((v): { relative: string; absolute: string } => {
-		return { relative: `./${relative(root, v)}`, absolute: resolve(root, v) };
-	});
-
-	end();
-
-	return tsFiles;
-}
 
 export async function main(): Promise<boolean> {
 	const end = ownedTimeSpan();

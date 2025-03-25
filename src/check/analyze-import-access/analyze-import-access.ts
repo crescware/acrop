@@ -1,4 +1,4 @@
-import type { VerboseLogger } from "../verbose-logger";
+import type { VerboseLogger } from "../../verbose-logger";
 import { analyze } from "./analyze";
 import type { AnalyzedResult } from "./analyzed-result";
 

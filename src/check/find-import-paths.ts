@@ -1,7 +1,7 @@
 import type { InferOutput } from "valibot";
 
+import { calcLineNumber } from "../calc-line-number";
 import { isImportDeclaration, type node$ } from "./ast";
-import { calcLineNumber } from "./calc-line-number";
 import type { makeAst } from "./make-ast";
 
 type Ast = NonNullable<ReturnType<typeof makeAst>>["ast"];

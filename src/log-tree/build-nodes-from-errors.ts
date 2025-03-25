@@ -1,4 +1,4 @@
-import type { ErrorReport } from "../error-report";
+import type { ErrorReport } from "../check/error-report";
 import type { TextNode } from "./log-tree";
 
 export function buildNodesFromErrors(

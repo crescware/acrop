@@ -1,23 +1,13 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
-import * as logReportsMod from "../../log-reports";
-import { timeEndMock } from "../../owned-time-span.mock";
-
-const outputFromTreeSpy = vi.spyOn(logReportsMod, "outputFromTree");
-
-function read(path: string): string {
-	return readFileSync(join(import.meta.dirname, path), "utf8");
-}
+import { outputFromTreeSpy } from "../../log-reports/output-from-tree.mock";
+import { prepareMocks } from "../prepare-mocks";
 
 describe("Case 05", () => {
+	let read: ReturnType<typeof prepareMocks>["read"];
+
 	beforeEach(() => {
-		const argvSpy = vi.spyOn(globalThis.process, "argv", "get");
-		const cwdSpy = vi.spyOn(globalThis.process, "cwd");
-		argvSpy.mockReturnValue(["nodePath", "entryPath", "./acrop.config.ts"]);
-		cwdSpy.mockReturnValue(import.meta.dirname);
-		timeEndMock.mockReturnValue(1.23);
+		({ read } = prepareMocks(import.meta.dirname));
 	});
 
 	afterEach(() => {
