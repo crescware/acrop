@@ -1,5 +1,5 @@
 import { relative } from "node:path";
-import type { importConfig } from "./import-config";
+import type { importConfig } from "../import-config";
 
 type Declaration = Awaited<ReturnType<typeof importConfig>>["scopes"][number];
 

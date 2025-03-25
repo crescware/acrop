@@ -1,14 +1,14 @@
 import { dirname, relative, resolve } from "node:path";
 import { minimatch } from "minimatch";
 
+import type { importConfig } from "../import-config";
+import type { Report } from "../log-tree";
+import type { VerboseLogger } from "../verbose-logger";
 import { analyzeImportAccess } from "./analyze-import-access";
 import { calcRules } from "./calc-rules";
 import type { ErrorReport } from "./error-report";
 import { findImportPaths } from "./find-import-paths";
-import type { importConfig } from "./import-config";
-import type { Report } from "./log-tree";
 import { makeAst } from "./make-ast";
-import type { VerboseLogger } from "./verbose-logger";
 
 type Return = Readonly<{
 	scoped: Set<string>;

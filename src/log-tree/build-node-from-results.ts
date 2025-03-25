@@ -1,4 +1,4 @@
-import type { AnalyzedResult } from "../analyze-import-access";
+import type { AnalyzedResult } from "../check/analyze-import-access";
 import type { TableNode } from "./log-tree";
 
 export function buildNodeFromResults(

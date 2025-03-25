@@ -4,8 +4,8 @@ import { resolve } from "node:path";
 import { transformFileSync } from "@babel/core";
 import { type InferOutput, flatten, safeParse } from "valibot";
 
+import type { VerboseLogger } from "../verbose-logger";
 import { config$ } from "./config";
-import type { VerboseLogger } from "./verbose-logger";
 
 const ext = ".mjs";
 
