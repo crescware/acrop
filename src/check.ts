@@ -1,6 +1,7 @@
 import { dirname, relative, resolve } from "node:path";
 import { minimatch } from "minimatch";
 
+import { analyzeImportAccess } from "./analyze-import-access";
 import { calcRules } from "./calc-rules";
 import type { ErrorReport } from "./error-report";
 import { findImportPaths } from "./find-import-paths";
@@ -69,31 +70,9 @@ export function check(
 			);
 			end5();
 
-			const result = infoArray.map((info) => {
-				let isAllowed = false;
-				let matchFound = false;
+			const analyzed = analyzeImportAccess(logger, rules, infoArray);
 
-				for (const rule of rules) {
-					if (minimatch(info.path.relative, rule.pattern)) {
-						isAllowed = rule.type === "allowed";
-						matchFound = true;
-						break;
-					}
-				}
-
-				if (!matchFound) {
-					isAllowed = false;
-				}
-
-				return {
-					path: info.path,
-					isAllowed,
-					line: info.line,
-					column: info.column,
-				};
-			});
-
-			reports.push({ path, result });
+			reports.push({ path, result: analyzed });
 			scoped.add(path.absolute);
 		}
 	}

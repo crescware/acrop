@@ -1,8 +1,8 @@
-import { transformFileSync } from "@babel/core";
-import { flatten, type InferOutput, safeParse } from "valibot";
 import { existsSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
+import { transformFileSync } from "@babel/core";
+import { type InferOutput, flatten, safeParse } from "valibot";
 
 import { config$ } from "./config";
 import type { VerboseLogger } from "./verbose-logger";
@@ -46,7 +46,7 @@ export async function importConfig(
 	const parseResult = safeParse(config$, mod);
 
 	if (!parseResult.success) {
-		console.log(flatten(parseResult.issues));
+		console.info(flatten(parseResult.issues));
 		throw new Error();
 	}
 

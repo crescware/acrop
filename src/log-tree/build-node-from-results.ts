@@ -1,16 +1,16 @@
-import type { Result } from "./result";
+import type { AnalyzedResult } from "../analyze-import-access";
 import type { TableNode } from "./log-tree";
 
 export function buildNodeFromResults(
-	filtered: readonly Result[],
+	analyzedResults: readonly AnalyzedResult[],
 ): TableNode | null {
-	if (filtered.length === 0) {
+	if (analyzedResults.length === 0) {
 		return null;
 	}
 
 	return {
 		type: "table",
-		rows: filtered.map((v) => {
+		rows: analyzedResults.map((v) => {
 			return [
 				{
 					type: "text",
