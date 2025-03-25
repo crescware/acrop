@@ -25,7 +25,6 @@ const rule$ = union([
 const scope$ = strictObject({
 	scope: glob$,
 	rules: array(rule$),
-	disallowSiblingImportsUnlessAllow: optional(boolean()),
 });
 
 export const config$ = strictObject({
