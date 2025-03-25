@@ -1,6 +1,7 @@
 import { dirname, relative } from "node:path";
 
 import { assertExists } from "./exists/assert-exists";
+import { exists } from "./exists/exists";
 import type { importConfig } from "./import-config";
 
 type Declaration = Awaited<ReturnType<typeof importConfig>>["scopes"][number];
@@ -55,22 +56,27 @@ export function calcRules(
 ): Rules {
 	const relativePath = `./${relative(root, tsPath)}`;
 
+	const allowedPaths: /* readwrite */ string[] = [];
+	const restrictedPaths: /* readwrite */ string[] = [];
+
 	const rule = declaration.rules[0] ?? null;
-	assertExists(rule);
 
-	const allowed = (() => {
-		const tmp = processAllowedRule(rule, relativePath);
-		return [
-			...tmp,
-			(declaration.disallowSiblingImportsUnlessAllow ?? false)
-				? null
-				: `./${relative(root, dirname(tsPath))}/**/*`,
-		]
-			.filter((v) => v !== null)
-			.flatMap((v) => [v, v.replace(/\/\*\*\/\*$/, "")]) as string[];
-	})();
+	if (exists(rule)) {
+		allowedPaths.push(...processAllowedRule(rule, relativePath));
+		restrictedPaths.push(...processRestrictedRule(rule, relativePath));
+	}
 
-	const restricted = processRestrictedRule(rule, relativePath);
+	const finalAllowed = [
+		...allowedPaths,
+		(declaration.disallowSiblingImportsUnlessAllow ?? false)
+			? null
+			: `./${relative(root, dirname(tsPath))}/**/*`,
+	]
+		.filter((v) => v !== null)
+		.flatMap((v) => [v, v.replace(/\/\*\*\/\*$/, "")]) as string[];
 
-	return { allowed, restricted };
+	return {
+		allowed: finalAllowed,
+		restricted: restrictedPaths,
+	};
 }
