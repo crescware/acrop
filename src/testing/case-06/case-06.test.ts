@@ -11,7 +11,7 @@ function read(path: string): string {
 	return readFileSync(join(import.meta.dirname, path), "utf8");
 }
 
-describe("Case 05", () => {
+describe("Case 06", () => {
 	beforeEach(() => {
 		const argvSpy = vi.spyOn(globalThis.process, "argv", "get");
 		const cwdSpy = vi.spyOn(globalThis.process, "cwd");
@@ -46,6 +46,10 @@ describe("Case 05", () => {
 
 			test(`should restrict "./b" in the scope`, () => {
 				expect(config.scopes[0]?.rules[0]?.restricted).toEqual(["./b/**/*"]);
+			});
+
+			test(`should allow "./c" in the scope`, () => {
+				expect(config.scopes[0]?.rules[1]?.allowed).toEqual(["./c/**/*"]);
 			});
 		});
 
