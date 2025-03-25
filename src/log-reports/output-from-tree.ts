@@ -7,9 +7,11 @@ export function outputFromTree(tree: LogTree): void {
 		if (node.type === "text") {
 			return makeFromTextNode(node);
 		}
+
 		if (node.type === "table") {
 			return makeTableLines(node);
 		}
+
 		throw new Error("invalid node");
 	});
 
