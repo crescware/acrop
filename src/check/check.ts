@@ -1,14 +1,10 @@
-import { dirname, relative, resolve } from "node:path";
 import { minimatch } from "minimatch";
 
 import type { importConfig } from "../import-config";
 import type { Report } from "../log-tree";
 import type { VerboseLogger } from "../verbose-logger";
-import { analyzeImportAccess } from "./analyze-import-access";
-import { calcRules } from "./calc-rules";
+import { checkScope } from "./check-scope";
 import type { ErrorReport } from "./error-report";
-import { findImportPaths } from "./find-import-paths";
-import { makeAst } from "./make-ast";
 
 type Return = Readonly<{
 	scoped: Set<string>;
@@ -18,7 +14,7 @@ type Return = Readonly<{
 
 export function check(
 	logger: VerboseLogger,
-	config: Awaited<ReturnType<typeof importConfig>>,
+	scopes: Awaited<ReturnType<typeof importConfig>>["scopes"],
 	tsFiles: readonly { relative: string; absolute: string }[],
 	root: string,
 ): Return {
@@ -28,9 +24,8 @@ export function check(
 	const errorsRef = [] as ErrorReport[];
 	const reports = [] as Report[];
 
-	for (const declaration of config.scopes) {
+	for (const declaration of scopes) {
 		const end2 = logger.start(`> "${declaration.scope}" Matched file in scope`);
-
 		const filtered = tsFiles.filter((tsFile) => {
 			const end3 = logger.start(`> > "${tsFile.relative}" Match file`);
 			if (scoped.has(tsFile.absolute)) {
@@ -41,43 +36,12 @@ export function check(
 			end3();
 			return ret;
 		});
-
 		end2();
 
-		for (const path of filtered) {
-			const end4 = logger.start(`> > "${path.relative}" Make ast`);
-
-			const makeAstResult = makeAst(path.absolute, errorsRef);
-			if (makeAstResult === null) {
-				end4();
-				continue;
-			}
-			end4();
-
-			const { ast, positions } = makeAstResult;
-			const rules = calcRules(root, path.absolute, declaration);
-
-			const end5 = logger.start(`> > "${path.relative}" Find import paths`);
-			const infoArray = findImportPaths(ast, positions).map(
-				(v): ReturnType<typeof findImportPaths>[number] => {
-					const relativePath = `./${relative(root, resolve(dirname(path.absolute), v.path.relative))}`;
-					return {
-						path: { relative: relativePath },
-						line: v.line,
-						column: v.column,
-					};
-				},
-			);
-			end5();
-
-			const analyzed = analyzeImportAccess(logger, rules, infoArray);
-
-			reports.push({ path, result: analyzed });
-			scoped.add(path.absolute);
-		}
+		checkScope(logger, declaration, filtered, root, scoped, errorsRef, reports);
 	}
 
+	const ret = { scoped, errorsRef, reports } satisfies Return;
 	end1();
-
-	return { scoped, errorsRef, reports };
+	return ret;
 }

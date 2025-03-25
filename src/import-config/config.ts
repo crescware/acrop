@@ -3,6 +3,7 @@ import {
 	boolean,
 	function_,
 	minLength,
+	optional,
 	pipe,
 	strictObject,
 	string,
@@ -27,6 +28,7 @@ const rule$ = union([
 const scope$ = strictObject({
 	scope: glob$,
 	rules: array(rule$),
+	only: optional(boolean()),
 });
 
 export const config$ = strictObject({

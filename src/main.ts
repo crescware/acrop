@@ -26,7 +26,23 @@ export async function main(): Promise<boolean> {
 	const config = await importConfig(logger, configPath);
 	const tsFiles = getAllTsFiles(logger, root);
 
-	const { scoped, errorsRef, reports } = check(logger, config, tsFiles, root);
+	const onlyScopes = config.scopes.filter((scope) => scope.only);
+	const hasOnlyScopes = 0 < onlyScopes.length;
+	const scopeDeclarations = hasOnlyScopes ? onlyScopes : config.scopes;
+
+	if (hasOnlyScopes) {
+		console.info(
+			`Found ${onlyScopes.length} scope(s) with "only: true", processing only these scopes`,
+		);
+		console.info(""); // blank
+	}
+
+	const { scoped, errorsRef, reports } = check(
+		logger,
+		scopeDeclarations,
+		tsFiles,
+		root,
+	);
 
 	const duration = end();
 
@@ -34,17 +50,22 @@ export async function main(): Promise<boolean> {
 		.flatMap((v) => v.result)
 		.filter((v) => !v.isAllowed).length;
 
-	outputFromTree(
-		buildTree(
-			errorsRef,
-			reports,
-			tsFiles,
-			scoped,
-			needsReportUnscoped,
-			duration,
-			restrictedImports,
-		),
+	const tree = buildTree(
+		errorsRef,
+		reports,
+		tsFiles,
+		scoped,
+		needsReportUnscoped,
+		duration,
+		restrictedImports,
 	);
+
+	outputFromTree(tree);
+
+	if (hasOnlyScopes) {
+		console.info(`Failed due to "only: true" flag`);
+		return false;
+	}
 
 	return restrictedImports === 0;
 }
