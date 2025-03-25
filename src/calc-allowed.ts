@@ -1,5 +1,6 @@
 import { dirname, relative } from "node:path";
 
+import { assertExists } from "./exists/assert-exists";
 import type { importConfig } from "./import-config";
 
 type Declaration = Awaited<ReturnType<typeof importConfig>>["scopes"][number];
@@ -7,9 +8,12 @@ type Declaration = Awaited<ReturnType<typeof importConfig>>["scopes"][number];
 export function calcAllowed(
 	root: string,
 	tsPath: string,
-	declaration: Declaration,
+	declaration_: Declaration,
 ): readonly string[] {
 	const base = ((): readonly string[] => {
+		const declaration = declaration_.rules[0] ?? null;
+		assertExists(declaration);
+
 		if (
 			typeof declaration.allowed === "object" &&
 			Array.isArray(declaration.allowed)
@@ -21,13 +25,15 @@ export function calcAllowed(
 			return declaration.allowed(`./${relative(root, tsPath)}`) as string[];
 		}
 
-		throw new Error("invalid");
+		throw new Error(
+			"Invalid configuration: rules[0].allowed is not properly defined",
+		);
 	})();
 
 	return (
 		[
 			...base,
-			(declaration.disallowSiblingImportsUnlessAllow ?? false)
+			(declaration_.disallowSiblingImportsUnlessAllow ?? false)
 				? null
 				: `./${relative(root, dirname(tsPath))}/**/*`,
 		]

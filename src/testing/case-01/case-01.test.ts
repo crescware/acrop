@@ -1,9 +1,9 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { join } from "node:path";
 import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
-import { timeEndMock } from "../../owned-time-span.mock";
 import * as logReportsMod from "../../log-reports";
+import { timeEndMock } from "../../owned-time-span.mock";
 
 const outputFromTreeSpy = vi.spyOn(logReportsMod, "outputFromTree");
 
@@ -45,7 +45,7 @@ describe("Case 01", () => {
 			});
 
 			test(`should allow "./b" in the scope`, () => {
-				expect(config.scopes[0]?.allowed).toEqual(["./b/**/*"]);
+				expect(config.scopes[0]?.rules[0]?.allowed).toEqual(["./b/**/*"]);
 			});
 		});
 

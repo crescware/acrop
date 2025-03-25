@@ -46,7 +46,6 @@
 	"scripts": {
 		"build": "npm run check -- run && tsup ./index.ts  --format esm && echo '#!/usr/bin/env node' | cat - dist/index.js > dist/index.mjs && rm dist/index.js",
 		"check": "npm run check:types && npm run check:lint && npm run test",
-
 		"check:lint": "biome lint",
 		"check:types": "tsc -p ./tsconfig.json --noEmit",
 		"start": "tsx ./index.ts",
