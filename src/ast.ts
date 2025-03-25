@@ -20,16 +20,16 @@ const positionEntries = {
   end: positionIndex$,
 } satisfies Parameters<typeof object>[0];
 
-const stringLiteral$ = object({
+const literal$ = object({
   ...positionEntries,
-  type: literal("StringLiteral"),
+  type: literal("Literal"),
   value: string(),
 });
 
 const importDeclaration$ = object({
   ...positionEntries,
   type: literal("ImportDeclaration"),
-  source: stringLiteral$,
+  source: literal$,
 });
 
 export function isImportDeclaration(

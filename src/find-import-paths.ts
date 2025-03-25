@@ -1,4 +1,4 @@
-import { InferOutput, NonNullable } from "valibot";
+import { InferOutput } from "valibot";
 
 import { makeAst } from "./make-ast";
 import { isImportDeclaration, node$ } from "./ast";
