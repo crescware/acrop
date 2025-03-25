@@ -37,6 +37,7 @@ export function check(
 		console.info(
 			`Found ${onlyScopes.length} scope(s) with "only: true", processing only these scopes`,
 		);
+		console.info(""); // blank
 	}
 
 	for (const declaration of scopeDeclarations) {
