@@ -16,7 +16,9 @@ export function getLineStartPositions(code: string): readonly number[] {
 		}
 		if (newline === "\n" && code[i] === "\n") {
 			positions.push(i + 2);
+			// no continue, no return
 		}
+		// noop
 	}
 
 	return positions;
