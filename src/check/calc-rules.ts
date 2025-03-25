@@ -8,6 +8,16 @@ export type Rule = Readonly<{
 	pattern: string;
 }>;
 
+function expandPatterns(patterns: readonly string[]): readonly string[] {
+	return patterns.flatMap((pattern) => {
+		if (pattern.endsWith("/**/*")) {
+			return [pattern, pattern.replace(/\/\*\*\/\*$/, "")];
+		}
+
+		return [pattern, `${pattern}/**/*`];
+	});
+}
+
 function processSiblingRule(
 	rule: NonNullable<Declaration["rules"][number]>,
 	tsPath: string,
@@ -40,17 +50,19 @@ function processAllowedRule(
 		return [];
 	}
 
-	if (typeof rule.allowed === "object" && Array.isArray(rule.allowed)) {
-		return rule.allowed;
-	}
+	const paths: readonly string[] = (() => {
+		if (typeof rule.allowed === "object" && Array.isArray(rule.allowed)) {
+			return rule.allowed;
+		}
+		if (typeof rule.allowed === "function") {
+			return rule.allowed(relativePath) as string[];
+		}
+		throw new Error(
+			"Invalid configuration: rule.allowed is not properly defined",
+		);
+	})();
 
-	if (typeof rule.allowed === "function") {
-		return rule.allowed(relativePath) as string[];
-	}
-
-	throw new Error(
-		"Invalid configuration: rule.allowed is not properly defined",
-	);
+	return expandPatterns(paths);
 }
 
 function processRestrictedRule(
@@ -61,17 +73,19 @@ function processRestrictedRule(
 		return [];
 	}
 
-	if (typeof rule.restricted === "object" && Array.isArray(rule.restricted)) {
-		return rule.restricted;
-	}
+	const paths: readonly string[] = (() => {
+		if (typeof rule.restricted === "object" && Array.isArray(rule.restricted)) {
+			return rule.restricted;
+		}
+		if (typeof rule.restricted === "function") {
+			return rule.restricted(relativePath) as string[];
+		}
+		throw new Error(
+			"Invalid configuration: rule.restricted is not properly defined",
+		);
+	})();
 
-	if (typeof rule.restricted === "function") {
-		return rule.restricted(relativePath) as string[];
-	}
-
-	throw new Error(
-		"Invalid configuration: rule.restricted is not properly defined",
-	);
+	return expandPatterns(paths);
 }
 
 export function calcRules(
