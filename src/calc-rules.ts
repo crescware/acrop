@@ -5,47 +5,72 @@ import type { importConfig } from "./import-config";
 
 type Declaration = Awaited<ReturnType<typeof importConfig>>["scopes"][number];
 
+export type Rules = Readonly<{
+	allowed: readonly string[];
+	restricted: readonly string[];
+}>;
+
+function processAllowedRule(
+	rule: NonNullable<Declaration["rules"][number]>,
+	relativePath: string,
+): readonly string[] {
+	if (!("allowed" in rule)) {
+		return [];
+	}
+
+	if (typeof rule.allowed === "object" && Array.isArray(rule.allowed)) {
+		return rule.allowed;
+	}
+
+	if (typeof rule.allowed === "function") {
+		return rule.allowed(relativePath) as string[];
+	}
+
+	throw Error("Invalid configuration: rule.allowed is not properly defined");
+}
+
+function processRestrictedRule(
+	rule: NonNullable<Declaration["rules"][number]>,
+	relativePath: string,
+): readonly string[] {
+	if (!("restricted" in rule)) {
+		return [];
+	}
+
+	if (typeof rule.restricted === "object" && Array.isArray(rule.restricted)) {
+		return rule.restricted;
+	}
+
+	if (typeof rule.restricted === "function") {
+		return rule.restricted(relativePath) as string[];
+	}
+
+	throw Error("Invalid configuration: rule.restricted is not properly defined");
+}
+
 export function calcRules(
 	root: string,
 	tsPath: string,
 	declaration: Declaration,
-): readonly string[] {
-	const base = ((): readonly string[] => {
-		const rule = declaration.rules[0] ?? null;
-		assertExists(rule);
+): Rules {
+	const relativePath = `./${relative(root, tsPath)}`;
 
-		if ("allowed" in rule) {
-			if (typeof rule.allowed === "object" && Array.isArray(rule.allowed)) {
-				return rule.allowed;
-			}
+	const rule = declaration.rules[0] ?? null;
+	assertExists(rule);
 
-			if (typeof rule.allowed === "function") {
-				return rule.allowed(`./${relative(root, tsPath)}`) as string[];
-			}
-
-			throw Error(
-				"Invalid configuration: rule.allowed is not properly defined",
-			);
-		}
-
-		if ("restricted" in rule) {
-			return [];
-		}
-
-		throw new Error(
-			"Invalid configuration: rule is neither allowed nor restricted",
-		);
-	})();
-
-	return (
-		[
-			...base,
+	const allowed = (() => {
+		const tmp = processAllowedRule(rule, relativePath);
+		return [
+			...tmp,
 			(declaration.disallowSiblingImportsUnlessAllow ?? false)
 				? null
 				: `./${relative(root, dirname(tsPath))}/**/*`,
 		]
 			.filter((v) => v !== null)
-			// Add a glob pattern that allows the directory itself to include index.ts
-			.flatMap((v) => [v, v.replace(/\/\*\*\/\*$/, "")])
-	);
+			.flatMap((v) => [v, v.replace(/\/\*\*\/\*$/, "")]) as string[];
+	})();
+
+	const restricted = processRestrictedRule(rule, relativePath);
+
+	return { allowed, restricted };
 }

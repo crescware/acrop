@@ -47,7 +47,7 @@ export function check(
 			end4();
 
 			const { ast, positions } = makeAstResult;
-			const allowed = calcRules(root, path.absolute, declaration);
+			const rules = calcRules(root, path.absolute, declaration);
 
 			const end5 = logger.start(`> > "${path.relative}" Find import paths`);
 			const infoArray = findImportPaths(ast, positions).map(
@@ -63,27 +63,15 @@ export function check(
 			end5();
 
 			const result = infoArray.map((info) => {
-				// 制限パスをチェック - 最初のルールに restricted がある場合
-				const rule = declaration.rules[0];
-				let isRestricted = false;
-
-				if (rule && "restricted" in rule) {
-					const restrictedPaths =
-						typeof rule.restricted === "function"
-							? (rule.restricted(
-									`./${relative(root, path.absolute)}`,
-								) as string[])
-							: rule.restricted;
-
-					isRestricted = restrictedPaths.some((restrictedPath) =>
-						minimatch(info.path.relative, restrictedPath),
-					);
-				}
+				// 制限パスをチェック
+				const isRestricted = rules.restricted.some((restrictedPath) =>
+					minimatch(info.path.relative, restrictedPath),
+				);
 
 				// 制限されていなければ、許可パスをチェック
 				const isAllowed =
 					!isRestricted &&
-					allowed.some((allowedPath) =>
+					rules.allowed.some((allowedPath) =>
 						minimatch(info.path.relative, allowedPath),
 					);
 

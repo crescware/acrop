@@ -49,7 +49,8 @@
 		"check:lint": "biome lint",
 		"check:types": "tsc -p ./tsconfig.json --noEmit",
 		"start": "tsx ./index.ts",
-		"test": "vitest"
+		"test": "npm run test:watch -- --run",
+		"test:watch": "vitest"
 	},
 	"type": "module"
 }
