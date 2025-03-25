@@ -13,9 +13,13 @@ import {
 const path$ = pipe(string(), minLength(1));
 const glob$ = pipe(string(), minLength(1));
 
+const rule$ = strictObject({
+	allowed: union([pipe(array(glob$), minLength(0)), function_()]),
+});
+
 const scope$ = strictObject({
 	scope: glob$,
-	allowed: union([pipe(array(glob$), minLength(0)), function_()]),
+	rules: array(rule$),
 	disallowSiblingImportsUnlessAllow: optional(boolean()),
 });
 

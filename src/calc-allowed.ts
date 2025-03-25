@@ -1,5 +1,6 @@
 import { dirname, relative } from "node:path";
 
+import { assertExists } from "./exists/assert-exists";
 import type { importConfig } from "./import-config";
 
 type Declaration = Awaited<ReturnType<typeof importConfig>>["scopes"][number];
@@ -10,18 +11,20 @@ export function calcAllowed(
 	declaration: Declaration,
 ): readonly string[] {
 	const base = ((): readonly string[] => {
-		if (
-			typeof declaration.allowed === "object" &&
-			Array.isArray(declaration.allowed)
-		) {
-			return declaration.allowed;
+		const rule = declaration.rules[0] ?? null;
+		assertExists(rule);
+
+		if (typeof rule.allowed === "object" && Array.isArray(rule.allowed)) {
+			return rule.allowed;
 		}
 
-		if (typeof declaration.allowed === "function") {
-			return declaration.allowed(`./${relative(root, tsPath)}`) as string[];
+		if (typeof rule.allowed === "function") {
+			return rule.allowed(`./${relative(root, tsPath)}`) as string[];
 		}
 
-		throw new Error("invalid");
+		throw new Error(
+			"Invalid configuration: rules[0].allowed is not properly defined",
+		);
 	})();
 
 	return (
