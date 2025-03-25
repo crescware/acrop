@@ -14,9 +14,8 @@ type Return = Readonly<{
 export function makeAst(path: string, errorsRef: unknown[]): Return {
   const code = readFileSync(path, "utf-8");
 
-  const result = parseSync(code, {
+  const result = parseSync( basename(path),code, {
     sourceType: "module",
-    sourceFilename: basename(path),
   });
 
   if (0 < result.errors.length) {
