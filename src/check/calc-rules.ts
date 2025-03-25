@@ -1,5 +1,4 @@
 import { dirname, relative } from "node:path";
-import { exists } from "../exists/exists";
 import type { importConfig } from "../import-config";
 
 type Declaration = Awaited<ReturnType<typeof importConfig>>["scopes"][number];
@@ -11,20 +10,26 @@ export type Rule = Readonly<{
 
 function processSiblingRule(
 	rule: NonNullable<Declaration["rules"][number]>,
-	root: string,
 	tsPath: string,
-): Readonly<{
-	type: "allowed" | "restricted";
-	pattern: string;
-}> | null {
+	root: string,
+):
+	| readonly Readonly<{
+			type: "allowed" | "restricted";
+			pattern: string;
+	  }>[]
+	| null {
 	if (!("sibling" in rule)) {
 		return null;
 	}
 
-	return {
-		type: rule.sibling ? "allowed" : "restricted",
-		pattern: `./${relative(root, dirname(tsPath))}/**/*`,
-	};
+	const basePath = `./${relative(root, dirname(tsPath))}`;
+	const patterns = [`${basePath}/**/*`, basePath];
+
+	const ruleType = rule.sibling ? "allowed" : "restricted";
+
+	return patterns.map((pattern) => {
+		return { type: ruleType, pattern };
+	});
 }
 
 function processAllowedRule(
@@ -79,9 +84,9 @@ export function calcRules(
 	const orderedRules: /* readwrite */ Rule[] = [];
 
 	for (const rule of declaration.rules) {
-		const siblingRule = processSiblingRule(rule, root, tsPath);
-		if (exists(siblingRule)) {
-			orderedRules.push(siblingRule);
+		const siblingRules = processSiblingRule(rule, tsPath, root);
+		if (siblingRules !== null) {
+			orderedRules.push(...siblingRules);
 			continue;
 		}
 
