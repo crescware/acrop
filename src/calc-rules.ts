@@ -5,7 +5,7 @@ import type { importConfig } from "./import-config";
 
 type Declaration = Awaited<ReturnType<typeof importConfig>>["scopes"][number];
 
-export function calcAllowed(
+export function calcRules(
 	root: string,
 	tsPath: string,
 	declaration: Declaration,
