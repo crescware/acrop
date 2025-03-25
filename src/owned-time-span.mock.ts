@@ -8,5 +8,5 @@ export const timeEndMock = vi.fn<TimeEndFunction>();
 const timeSpanMock = vi.fn<TimeSpan>().mockReturnValue(timeEndMock);
 
 vi.mock("./owned-time-span", (): typeof mod => {
-  return { ownedTimeSpan: timeSpanMock };
+	return { ownedTimeSpan: timeSpanMock };
 });

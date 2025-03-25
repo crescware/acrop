@@ -1,6 +1,6 @@
-import { TextNode } from "../log-tree/log-tree";
+import type { TextNode } from "../log-tree/log-tree";
 import { makeFromTextElement } from "./make-from-text-element";
 
 export function makeFromTextNode(node: TextNode): string {
-  return node.elements.map((v) => makeFromTextElement(v)).join("");
+	return node.elements.map((v) => makeFromTextElement(v)).join("");
 }

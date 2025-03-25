@@ -1,1 +1,1 @@
-export { calcLineNumber } from './calc-line-number';
+export { calcLineNumber } from "./calc-line-number";

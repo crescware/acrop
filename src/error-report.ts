@@ -1,4 +1,4 @@
 export type ErrorReport = Readonly<{
-  path: string;
-  errors: readonly string[];
+	path: string;
+	errors: readonly string[];
 }>;

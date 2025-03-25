@@ -3,35 +3,35 @@ import timeSpan from "time-span";
 type StartImplReturn = () => void;
 
 export class VerboseLogger {
-  #verbose: boolean = false;
+	#verbose = false;
 
-  constructor(verbose: boolean) {
-    this.#verbose = verbose;
-  }
+	constructor(verbose: boolean) {
+		this.#verbose = verbose;
+	}
 
-  start(v: string): StartImplReturn {
-    return this.#startImpl(v, false);
-  }
+	start(v: string): StartImplReturn {
+		return this.#startImpl(v, false);
+	}
 
-  startWithHeader(v: string): StartImplReturn {
-    return this.#startImpl(v, true);
-  }
+	startWithHeader(v: string): StartImplReturn {
+		return this.#startImpl(v, true);
+	}
 
-  #startImpl(v: string, showStartLog: boolean): StartImplReturn {
-    if (!this.#verbose) {
-      return () => {
-        // noop
-      };
-    }
+	#startImpl(v: string, showStartLog: boolean): StartImplReturn {
+		if (!this.#verbose) {
+			return () => {
+				// noop
+			};
+		}
 
-    if (showStartLog) {
-      console.log(v);
-    }
+		if (showStartLog) {
+			console.log(v);
+		}
 
-    const end = timeSpan();
+		const end = timeSpan();
 
-    return () => {
-      console.log([`${v}:`, end(), "ms"].join(" "));
-    };
-  }
+		return () => {
+			console.log([`${v}:`, end(), "ms"].join(" "));
+		};
+	}
 }
