@@ -1,6 +1,7 @@
 import { dirname, relative, resolve } from "node:path";
 import { minimatch } from "minimatch";
 
+import { analyzeImportAccess } from "./analyze-import-access";
 import { calcRules } from "./calc-rules";
 import type { ErrorReport } from "./error-report";
 import { findImportPaths } from "./find-import-paths";
@@ -9,16 +10,23 @@ import type { Report } from "./log-tree";
 import { makeAst } from "./make-ast";
 import type { VerboseLogger } from "./verbose-logger";
 
+type Return = Readonly<{
+	scoped: Set<string>;
+	errorsRef: readonly ErrorReport[];
+	reports: readonly Report[];
+}>;
+
 export function check(
 	logger: VerboseLogger,
 	config: Awaited<ReturnType<typeof importConfig>>,
 	tsFiles: readonly { relative: string; absolute: string }[],
 	root: string,
-	scoped: Set<string>,
-	errorsRef: /* readwrite */ ErrorReport[],
-	reports: /* readwrite */ Report[],
-) {
+): Return {
 	const end1 = logger.startWithHeader("Check files");
+
+	const scoped = new Set<string>();
+	const errorsRef = [] as ErrorReport[];
+	const reports = [] as Report[];
 
 	for (const declaration of config.scopes) {
 		const end2 = logger.start(`> "${declaration.scope}" Matched file in scope`);
@@ -42,7 +50,7 @@ export function check(
 			const makeAstResult = makeAst(path.absolute, errorsRef);
 			if (makeAstResult === null) {
 				end4();
-				return;
+				continue;
 			}
 			end4();
 
@@ -62,34 +70,14 @@ export function check(
 			);
 			end5();
 
-			const result = infoArray.map((info) => {
-				let isAllowed = false;
-				let matchFound = false;
+			const analyzed = analyzeImportAccess(logger, rules, infoArray);
 
-				for (const rule of rules) {
-					if (minimatch(info.path.relative, rule.pattern)) {
-						isAllowed = rule.type === "allowed";
-						matchFound = true;
-						break;
-					}
-				}
-
-				if (!matchFound) {
-					isAllowed = false;
-				}
-
-				return {
-					path: info.path,
-					isAllowed,
-					line: info.line,
-					column: info.column,
-				};
-			});
-
-			reports.push({ path, result });
+			reports.push({ path, result: analyzed });
 			scoped.add(path.absolute);
 		}
 	}
 
 	end1();
+
+	return { scoped, errorsRef, reports };
 }

@@ -25,13 +25,14 @@ export class VerboseLogger {
 		}
 
 		if (showStartLog) {
-			console.log(v);
+			console.info(v);
+			// no return;
 		}
 
 		const end = timeSpan();
 
 		return () => {
-			console.log([`${v}:`, end(), "ms"].join(" "));
+			console.info([`${v}:`, end(), "ms"].join(" "));
 		};
 	}
 }

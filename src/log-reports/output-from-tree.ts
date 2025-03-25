@@ -14,6 +14,6 @@ export function outputFromTree(tree: LogTree): void {
 	});
 
 	for (const v of mapped) {
-		console.log(v);
+		console.info(v);
 	}
 }

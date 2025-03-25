@@ -1,7 +1,4 @@
-import { dirname, relative } from "node:path";
-
-import { assertExists } from "./exists/assert-exists";
-import { exists } from "./exists/exists";
+import { relative } from "node:path";
 import type { importConfig } from "./import-config";
 
 type Declaration = Awaited<ReturnType<typeof importConfig>>["scopes"][number];
@@ -27,7 +24,9 @@ function processAllowedRule(
 		return rule.allowed(relativePath) as string[];
 	}
 
-	throw Error("Invalid configuration: rule.allowed is not properly defined");
+	throw new Error(
+		"Invalid configuration: rule.allowed is not properly defined",
+	);
 }
 
 function processRestrictedRule(
@@ -46,7 +45,9 @@ function processRestrictedRule(
 		return rule.restricted(relativePath) as string[];
 	}
 
-	throw Error("Invalid configuration: rule.restricted is not properly defined");
+	throw new Error(
+		"Invalid configuration: rule.restricted is not properly defined",
+	);
 }
 
 export function calcRules(
