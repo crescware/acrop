@@ -14,6 +14,7 @@ type Return = Readonly<{
 	scoped: Set<string>;
 	errorsRef: readonly ErrorReport[];
 	reports: readonly Report[];
+	hasOnlyScopes: boolean;
 }>;
 
 export function check(
@@ -28,7 +29,17 @@ export function check(
 	const errorsRef = [] as ErrorReport[];
 	const reports = [] as Report[];
 
-	for (const declaration of config.scopes) {
+	const onlyScopes = config.scopes.filter((scope) => scope.only);
+	const hasOnlyScopes = 0 < onlyScopes.length;
+	const scopeDeclarations = hasOnlyScopes ? onlyScopes : config.scopes;
+
+	if (hasOnlyScopes) {
+		console.info(
+			`Found ${onlyScopes.length} scope(s) with "only: true", processing only these scopes`,
+		);
+	}
+
+	for (const declaration of scopeDeclarations) {
 		const end2 = logger.start(`> "${declaration.scope}" Matched file in scope`);
 
 		const filtered = tsFiles.filter((tsFile) => {
@@ -79,5 +90,10 @@ export function check(
 
 	end1();
 
-	return { scoped, errorsRef, reports };
+	return {
+		scoped,
+		errorsRef,
+		reports,
+		hasOnlyScopes,
+	};
 }

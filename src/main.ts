@@ -26,7 +26,12 @@ export async function main(): Promise<boolean> {
 	const config = await importConfig(logger, configPath);
 	const tsFiles = getAllTsFiles(logger, root);
 
-	const { scoped, errorsRef, reports } = check(logger, config, tsFiles, root);
+	const { scoped, errorsRef, reports, hasOnlyScopes } = check(
+		logger,
+		config,
+		tsFiles,
+		root,
+	);
 
 	const duration = end();
 
@@ -45,6 +50,11 @@ export async function main(): Promise<boolean> {
 			restrictedImports,
 		),
 	);
+
+	if (hasOnlyScopes) {
+		console.info(`Failed due to "only: true" flag`);
+		return false;
+	}
 
 	return restrictedImports === 0;
 }
