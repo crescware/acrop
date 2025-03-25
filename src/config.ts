@@ -1,9 +1,7 @@
 import {
 	array,
-	boolean,
 	function_,
 	minLength,
-	optional,
 	pipe,
 	strictObject,
 	string,
