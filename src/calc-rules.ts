@@ -6,9 +6,9 @@ import type { importConfig } from "./import-config";
 
 type Declaration = Awaited<ReturnType<typeof importConfig>>["scopes"][number];
 
-export type Rules = Readonly<{
-	allowed: readonly string[];
-	restricted: readonly string[];
+export type Rule = Readonly<{
+	type: "allowed" | "restricted";
+	pattern: string;
 }>;
 
 function processAllowedRule(
@@ -53,30 +53,22 @@ export function calcRules(
 	root: string,
 	tsPath: string,
 	declaration: Declaration,
-): Rules {
+): readonly Rule[] {
 	const relativePath = `./${relative(root, tsPath)}`;
 
-	const allowedPaths: /* readwrite */ string[] = [];
-	const restrictedPaths: /* readwrite */ string[] = [];
+	const orderedRules: /* readwrite */ Rule[] = [];
 
-	const rule = declaration.rules[0] ?? null;
+	for (const rule of declaration.rules) {
+		const allowedPaths = processAllowedRule(rule, relativePath);
+		for (const pattern of allowedPaths) {
+			orderedRules.push({ type: "allowed", pattern });
+		}
 
-	if (exists(rule)) {
-		allowedPaths.push(...processAllowedRule(rule, relativePath));
-		restrictedPaths.push(...processRestrictedRule(rule, relativePath));
+		const restrictedPaths = processRestrictedRule(rule, relativePath);
+		for (const pattern of restrictedPaths) {
+			orderedRules.push({ type: "restricted", pattern });
+		}
 	}
 
-	const finalAllowed = [
-		...allowedPaths,
-		(declaration.disallowSiblingImportsUnlessAllow ?? false)
-			? null
-			: `./${relative(root, dirname(tsPath))}/**/*`,
-	]
-		.filter((v) => v !== null)
-		.flatMap((v) => [v, v.replace(/\/\*\*\/\*$/, "")]) as string[];
-
-	return {
-		allowed: finalAllowed,
-		restricted: restrictedPaths,
-	};
+	return orderedRules;
 }

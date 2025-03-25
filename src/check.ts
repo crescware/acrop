@@ -63,17 +63,23 @@ export function check(
 			end5();
 
 			const result = infoArray.map((info) => {
-				// 制限パスをチェック
-				const isRestricted = rules.restricted.some((restrictedPath) =>
-					minimatch(info.path.relative, restrictedPath),
-				);
+				// 先勝ち方式でルールを評価
+				let isAllowed = false;
+				let matchFound = false;
 
-				// 制限されていなければ、許可パスをチェック
-				const isAllowed =
-					!isRestricted &&
-					rules.allowed.some((allowedPath) =>
-						minimatch(info.path.relative, allowedPath),
-					);
+				// 順序付きルールリストを順に評価
+				for (const rule of rules) {
+					if (minimatch(info.path.relative, rule.pattern)) {
+						isAllowed = rule.type === "allowed";
+						matchFound = true;
+						break; // 最初にマッチしたルールで評価終了
+					}
+				}
+
+				// マッチするルールがなかった場合はデフォルトで禁止
+				if (!matchFound) {
+					isAllowed = false;
+				}
 
 				return {
 					path: info.path,

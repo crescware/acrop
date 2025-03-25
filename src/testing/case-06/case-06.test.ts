@@ -48,8 +48,12 @@ describe("Case 06", () => {
 				expect(config.scopes[0]?.rules[0]?.restricted).toEqual(["./b/**/*"]);
 			});
 
-			test(`should allow "./c" in the scope`, () => {
-				expect(config.scopes[0]?.rules[1]?.allowed).toEqual(["./c/**/*"]);
+			test(`should allow "./a", "./b", "./c" in the scope`, () => {
+				expect(config.scopes[0]?.rules[1]?.allowed).toEqual([
+					"./a/**/*",
+					"./b/**/*",
+					"./c/**/*",
+				]);
 			});
 		});
 

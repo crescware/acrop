@@ -3,7 +3,10 @@ const config = {
 	scopes: [
 		{
 			scope: "./a/**/*",
-			rules: [{ restricted: ["./b/**/*"] }, { allowed: ["./c/**/*"] }],
+			rules: [
+				{ restricted: ["./b/**/*"] },
+				{ allowed: ["./a/**/*", "./b/**/*", "./c/**/*"] },
+			],
 		},
 	],
 };
