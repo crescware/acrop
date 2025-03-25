@@ -63,12 +63,29 @@ export function check(
 			end5();
 
 			const result = infoArray.map((info) => {
-				const isAllowed = allowed.reduce((acc, allowedPath): boolean => {
-					if (acc) {
-						return acc;
-					}
-					return minimatch(info.path.relative, allowedPath);
-				}, false);
+				// 制限パスをチェック - 最初のルールに restricted がある場合
+				const rule = declaration.rules[0];
+				let isRestricted = false;
+
+				if (rule && "restricted" in rule) {
+					const restrictedPaths =
+						typeof rule.restricted === "function"
+							? (rule.restricted(
+									`./${relative(root, path.absolute)}`,
+								) as string[])
+							: rule.restricted;
+
+					isRestricted = restrictedPaths.some((restrictedPath) =>
+						minimatch(info.path.relative, restrictedPath),
+					);
+				}
+
+				// 制限されていなければ、許可パスをチェック
+				const isAllowed =
+					!isRestricted &&
+					allowed.some((allowedPath) =>
+						minimatch(info.path.relative, allowedPath),
+					);
 
 				return {
 					path: info.path,

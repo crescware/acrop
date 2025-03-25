@@ -14,16 +14,26 @@ export function calcAllowed(
 		const rule = declaration.rules[0] ?? null;
 		assertExists(rule);
 
-		if (typeof rule.allowed === "object" && Array.isArray(rule.allowed)) {
-			return rule.allowed;
+		if ("allowed" in rule) {
+			if (typeof rule.allowed === "object" && Array.isArray(rule.allowed)) {
+				return rule.allowed;
+			}
+
+			if (typeof rule.allowed === "function") {
+				return rule.allowed(`./${relative(root, tsPath)}`) as string[];
+			}
+
+			throw Error(
+				"Invalid configuration: rule.allowed is not properly defined",
+			);
 		}
 
-		if (typeof rule.allowed === "function") {
-			return rule.allowed(`./${relative(root, tsPath)}`) as string[];
+		if ("restricted" in rule) {
+			return [];
 		}
 
 		throw new Error(
-			"Invalid configuration: rules[0].allowed is not properly defined",
+			"Invalid configuration: rule is neither allowed nor restricted",
 		);
 	})();
 
