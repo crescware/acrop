@@ -1,0 +1,57 @@
+{
+	"$schema": "https://biomejs.dev/schemas/1.9.3/schema.json",
+	"files": {
+		"ignore": ["./.next/**/*", "./dist/**/*", "./coverage/**/*"]
+	},
+	"organizeImports": {
+		"enabled": true
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"complexity": {
+				"noUselessStringConcat": "error",
+				"useDateNow": "error"
+			},
+			"correctness": {
+				"noConstantMathMinMaxClamp": "error",
+				"noUnusedImports": "error",
+				"noUnusedPrivateClassMembers": "error",
+				"noUnusedVariables": "error",
+				"useArrayLiterals": "error",
+				"useExhaustiveDependencies": "error",
+				"useHookAtTopLevel": "error"
+			},
+			"nursery": {
+				"noDuplicateElseIf": "error",
+				"noDynamicNamespaceImportAccess": "error",
+				"noEnum": "error",
+				"noExportedImports": "error",
+				"noIrregularWhitespace": "error",
+				"useSortedClasses": {
+					"level": "error",
+					"options": { "attributes": ["classList"], "functions": ["clsx"] }
+				}
+			},
+			"performance": {
+				"noAccumulatingSpread": "off"
+			},
+			"style": {
+				"noRestrictedGlobals": "error",
+				"useBlockStatements": "error",
+				"useConsistentBuiltinInstantiation": "error",
+				"useDefaultSwitchClause": "error"
+			},
+			"suspicious": {
+				"noFocusedTests": "error",
+				"noConsole": {
+					"level": "error",
+					"options": { "allow": ["error", "info"] }
+				},
+				"noGlobalIsNan": "error",
+				"useNumberToFixedDigitsArgument": "error"
+			}
+		}
+	}
+}

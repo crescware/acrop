@@ -9,16 +9,23 @@ import type { Report } from "./log-tree";
 import { makeAst } from "./make-ast";
 import type { VerboseLogger } from "./verbose-logger";
 
+type Return = Readonly<{
+	scoped: Set<string>;
+	errorsRef: readonly ErrorReport[];
+	reports: readonly Report[];
+}>;
+
 export function check(
 	logger: VerboseLogger,
 	config: Awaited<ReturnType<typeof importConfig>>,
 	tsFiles: readonly { relative: string; absolute: string }[],
 	root: string,
-	scoped: Set<string>,
-	errorsRef: /* readwrite */ ErrorReport[],
-	reports: /* readwrite */ Report[],
-) {
+): Return {
 	const end1 = logger.startWithHeader("Check files");
+
+	const scoped = new Set<string>();
+	const errorsRef = [] as ErrorReport[];
+	const reports = [] as Report[];
 
 	for (const declaration of config.scopes) {
 		const end2 = logger.start(`> "${declaration.scope}" Matched file in scope`);
@@ -42,7 +49,7 @@ export function check(
 			const makeAstResult = makeAst(path.absolute, errorsRef);
 			if (makeAstResult === null) {
 				end4();
-				return;
+				continue;
 			}
 			end4();
 
@@ -92,4 +99,6 @@ export function check(
 	}
 
 	end1();
+
+	return { scoped, errorsRef, reports };
 }
