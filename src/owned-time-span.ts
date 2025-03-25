@@ -5,6 +5,6 @@ import timeSpan from "time-span";
  * we implemented a wrapper that returns only the functionality needed by this library.
  */
 export function ownedTimeSpan(): () => number {
-  const v = timeSpan();
-  return v.seconds.bind(v);
+	const v = timeSpan();
+	return v.seconds.bind(v);
 }

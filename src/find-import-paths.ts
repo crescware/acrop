@@ -1,49 +1,53 @@
-import { InferOutput } from "valibot";
+import type { InferOutput } from "valibot";
 
-import { makeAst } from "./make-ast";
-import { isImportDeclaration, node$ } from "./ast";
+import { isImportDeclaration, type node$ } from "./ast";
 import { calcLineNumber } from "./calc-line-number";
+import type { makeAst } from "./make-ast";
 
 type Ast = NonNullable<ReturnType<typeof makeAst>>["ast"];
 type Positions = NonNullable<ReturnType<typeof makeAst>>["positions"];
 
 type ImportInfo = Readonly<{
-  path: Readonly<{
-    relative: string;
-  }>;
-  line: number;
-  column: number;
+	path: Readonly<{
+		relative: string;
+	}>;
+	line: number;
+	column: number;
 }>;
 
 export function findImportPaths(
-  ast: Ast,
-  positions_: Positions,
+	ast: Ast,
+	positions_: Positions,
 ): readonly ImportInfo[] {
-  const importInfos: ImportInfo[] = [];
+	const importInfos: ImportInfo[] = [];
 
-  function traverse(
-    node: InferOutput<typeof node$>,
-    positions: Positions,
-  ): void {
-    if (isImportDeclaration(node)) {
-      const { line, column } = calcLineNumber(positions, node.source.start + 1);
-      importInfos.push({
-        path: { relative: node.source.value },
-        line,
-        column,
-      });
-      return;
-    }
+	function traverse(
+		node: InferOutput<typeof node$>,
+		positions: Positions,
+	): void {
+		if (isImportDeclaration(node)) {
+			const { line, column } = calcLineNumber(positions, node.source.start + 1);
+			importInfos.push({
+				path: { relative: node.source.value },
+				line,
+				column,
+			});
+			return;
+		}
 
-    if ("body" in node && Array.isArray(node.body)) {
-      node.body.forEach((v) => traverse(v, positions_));
-      return;
-    }
+		if ("body" in node && Array.isArray(node.body)) {
+			for (const v of node.body) {
+				traverse(v, positions_);
+			}
+			return;
+		}
 
-    // noop
-  }
+		// noop
+	}
 
-  ast.body.forEach((v) => traverse(v, positions_));
+	for (const v of ast.body) {
+		traverse(v, positions_);
+	}
 
-  return importInfos as readonly ImportInfo[];
+	return importInfos as readonly ImportInfo[];
 }

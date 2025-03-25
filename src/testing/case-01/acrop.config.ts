@@ -1,11 +1,11 @@
 const config = {
-  root: ".",
-  scopes: [
-    {
-      scope: "./a/**/*",
-      allowed: ["./b/**/*"],
-    },
-  ],
+	root: ".",
+	scopes: [
+		{
+			scope: "./a/**/*",
+			allowed: ["./b/**/*"],
+		},
+	],
 };
 
 export default config;

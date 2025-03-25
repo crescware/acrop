@@ -1,52 +1,52 @@
 import {
-  array,
-  InferOutput,
-  integer,
-  literal,
-  looseObject,
-  minValue,
-  number,
-  object,
-  pipe,
-  safeParse,
-  string,
-  union,
+	array,
+	type InferOutput,
+	integer,
+	literal,
+	looseObject,
+	minValue,
+	number,
+	object,
+	pipe,
+	safeParse,
+	string,
+	union,
 } from "valibot";
 
 const positionIndex$ = pipe(number(), integer(), minValue(0));
 
 const positionEntries = {
-  start: positionIndex$,
-  end: positionIndex$,
+	start: positionIndex$,
+	end: positionIndex$,
 } satisfies Parameters<typeof object>[0];
 
 const literal$ = object({
-  ...positionEntries,
-  type: literal("Literal"),
-  value: string(),
+	...positionEntries,
+	type: literal("Literal"),
+	value: string(),
 });
 
 const importDeclaration$ = object({
-  ...positionEntries,
-  type: literal("ImportDeclaration"),
-  source: literal$,
+	...positionEntries,
+	type: literal("ImportDeclaration"),
+	source: literal$,
 });
 
 export function isImportDeclaration(
-  v: unknown,
+	v: unknown,
 ): v is InferOutput<typeof importDeclaration$> {
-  return safeParse(importDeclaration$, v).success;
+	return safeParse(importDeclaration$, v).success;
 }
 
 export const node$ = union([
-  importDeclaration$,
-  looseObject({
-    type: string(),
-  }),
+	importDeclaration$,
+	looseObject({
+		type: string(),
+	}),
 ]);
 
 export const ast$ = object({
-  ...positionEntries,
-  type: literal("Program"),
-  body: array(node$),
+	...positionEntries,
+	type: literal("Program"),
+	body: array(node$),
 });

@@ -1,59 +1,56 @@
 {
-  "name": "acrop",
-  "description": "",
-  "version": "0.0.11",
-  "author": "Crescware Inc.",
-  "bin": {
-    "acrop": "./dist/index.mjs"
-  },
-  "bugs": {
-    "url": "https://github.com/crescware/acrop/issues"
-  },
-  "dependencies": {
-    "@babel/core": "~7.26.10",
-    "@babel/preset-typescript": "~7.27.0",
-    "detect-newline": "~4.0.1",
-    "ignore": "~5.3.2",
-    "minimatch": "~10.0.1",
-    "oxc-parser": "~0.61.2",
-    "table": "~6.9.0",
-    "time-span": "~5.1.0",
-    "valibot": "~1.0.0",
-    "yoctocolors": "~2.1.1"
-  },
-  "devDependencies": {
-    "@types/babel__core": "~7.20.5",
-    "@types/node": "~20.17.27",
-    "prettier": "~3.5.3",
-    "tsup": "8.4.0",
-    "tsx": "~4.19.3",
-    "typescript": "5.8.2",
-    "vitest": "~3.0.9"
-  },
-  "engines": {
-    "node": ">=20.0.0",
-    "npm": ">=10.0.0"
-  },
-  "files": [
-    "dist",
-    "src",
-    "package.json",
-    "README.md"
-  ],
-  "homepage": "https://github.com/crescware/acrop#readme",
-  "keywords": [],
-  "license": "MIT",
-  "main": "index.js",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/crescware/acrop.git"
-  },
-  "scripts": {
-    "build": "npm run check -- run && tsup ./index.ts  --format esm && echo '#!/usr/bin/env node' | cat - dist/index.js > dist/index.mjs && rm dist/index.js",
-    "check": "npm run check:type && npm run test",
-    "check:type": "tsc -p ./tsconfig.json --noEmit",
-    "start": "tsx ./index.ts",
-    "test": "vitest"
-  },
-  "type": "module"
+	"name": "acrop",
+	"description": "",
+	"version": "0.0.11",
+	"author": "Crescware Inc.",
+	"bin": {
+		"acrop": "./dist/index.mjs"
+	},
+	"bugs": {
+		"url": "https://github.com/crescware/acrop/issues"
+	},
+	"dependencies": {
+		"@babel/core": "~7.26.10",
+		"@babel/preset-typescript": "~7.27.0",
+		"detect-newline": "~4.0.1",
+		"ignore": "~5.3.2",
+		"minimatch": "~10.0.1",
+		"oxc-parser": "~0.61.2",
+		"table": "~6.9.0",
+		"time-span": "~5.1.0",
+		"valibot": "~1.0.0",
+		"yoctocolors": "~2.1.1"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
+		"@types/babel__core": "~7.20.5",
+		"@types/node": "~20.17.27",
+		"tsup": "8.4.0",
+		"tsx": "~4.19.3",
+		"typescript": "5.8.2",
+		"vitest": "~3.0.9"
+	},
+	"engines": {
+		"node": ">=20.0.0",
+		"npm": ">=10.0.0"
+	},
+	"files": ["dist", "src", "package.json", "README.md"],
+	"homepage": "https://github.com/crescware/acrop#readme",
+	"keywords": [],
+	"license": "MIT",
+	"main": "index.js",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/crescware/acrop.git"
+	},
+	"scripts": {
+		"build": "npm run check -- run && tsup ./index.ts  --format esm && echo '#!/usr/bin/env node' | cat - dist/index.js > dist/index.mjs && rm dist/index.js",
+		"check": "npm run check:types && npm run check:lint && npm run test",
+
+		"check:lint": "biome lint",
+		"check:types": "tsc -p ./tsconfig.json --noEmit",
+		"start": "tsx ./index.ts",
+		"test": "vitest"
+	},
+	"type": "module"
 }
