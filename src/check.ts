@@ -63,20 +63,17 @@ export function check(
 			end5();
 
 			const result = infoArray.map((info) => {
-				// 先勝ち方式でルールを評価
 				let isAllowed = false;
 				let matchFound = false;
 
-				// 順序付きルールリストを順に評価
 				for (const rule of rules) {
 					if (minimatch(info.path.relative, rule.pattern)) {
 						isAllowed = rule.type === "allowed";
 						matchFound = true;
-						break; // 最初にマッチしたルールで評価終了
+						break;
 					}
 				}
 
-				// マッチするルールがなかった場合はデフォルトで禁止
 				if (!matchFound) {
 					isAllowed = false;
 				}
