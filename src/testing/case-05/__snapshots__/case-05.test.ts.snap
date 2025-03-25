@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Case 04 > main() > should match the generated log output structure against the snapshot 1`] = `
+exports[`Case 05 > main() > should match the generated log output structure against the snapshot 1`] = `
 {
   "nodes": [
     {
@@ -28,7 +28,7 @@ exports[`Case 04 > main() > should match the generated log output structure agai
               "value": "gray",
             },
           ],
-          "text": "(2)",
+          "text": "(4)",
         },
       ],
       "type": "text",
@@ -57,7 +57,31 @@ exports[`Case 04 > main() > should match the generated log output structure agai
           {
             "elements": [
               {
-                "text": "./a/a2",
+                "text": "./b/b1",
+              },
+            ],
+            "type": "text",
+          },
+        ],
+        [
+          {
+            "elements": [
+              {
+                "attributes": [
+                  {
+                    "type": "color",
+                    "value": "gray",
+                  },
+                ],
+                "text": "2:20",
+              },
+            ],
+            "type": "text",
+          },
+          {
+            "elements": [
+              {
+                "text": "./c/c1",
               },
             ],
             "type": "text",
@@ -81,7 +105,31 @@ exports[`Case 04 > main() > should match the generated log output structure agai
           {
             "elements": [
               {
-                "text": "./b/b1",
+                "text": "./a/a2",
+              },
+            ],
+            "type": "text",
+          },
+        ],
+        [
+          {
+            "elements": [
+              {
+                "attributes": [
+                  {
+                    "type": "color",
+                    "value": "gray",
+                  },
+                ],
+                "text": "4:20",
+              },
+            ],
+            "type": "text",
+          },
+          {
+            "elements": [
+              {
+                "text": "./a/a3",
               },
             ],
             "type": "text",
@@ -132,7 +180,7 @@ exports[`Case 04 > main() > should match the generated log output structure agai
                     "value": "gray",
                   },
                 ],
-                "text": "(6 found, 3 unscoped)",
+                "text": "(7 found, 4 unscoped)",
               },
             ],
             "type": "text",
@@ -162,7 +210,7 @@ exports[`Case 04 > main() > should match the generated log output structure agai
                     "value": "yellow",
                   },
                 ],
-                "text": "2 lines",
+                "text": "4 lines",
               },
             ],
             "type": "text",

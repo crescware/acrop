@@ -3,8 +3,7 @@ const config = {
 	scopes: [
 		{
 			scope: "./a/**/*",
-			rules: [{ allowed: [] }],
-			disallowSiblingImportsUnlessAllow: true,
+			rules: [{ restricted: ["./b/**/*"] }],
 		},
 	],
 };

@@ -1,9 +1,7 @@
 import {
 	array,
-	boolean,
 	function_,
 	minLength,
-	optional,
 	pipe,
 	strictObject,
 	string,
@@ -13,14 +11,18 @@ import {
 const path$ = pipe(string(), minLength(1));
 const glob$ = pipe(string(), minLength(1));
 
-const rule$ = strictObject({
-	allowed: union([pipe(array(glob$), minLength(0)), function_()]),
-});
+const rule$ = union([
+	strictObject({
+		allowed: union([pipe(array(glob$), minLength(0)), function_()]),
+	}),
+	strictObject({
+		restricted: union([pipe(array(glob$), minLength(0)), function_()]),
+	}),
+]);
 
 const scope$ = strictObject({
 	scope: glob$,
 	rules: array(rule$),
-	disallowSiblingImportsUnlessAllow: optional(boolean()),
 });
 
 export const config$ = strictObject({

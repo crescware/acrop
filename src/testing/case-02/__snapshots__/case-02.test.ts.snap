@@ -28,7 +28,7 @@ exports[`Case 02 > main() > should match the generated log output structure agai
               "value": "gray",
             },
           ],
-          "text": "(1)",
+          "text": "(2)",
         },
       ],
       "type": "text",
@@ -39,6 +39,30 @@ exports[`Case 02 > main() > should match the generated log output structure agai
         "left",
       ],
       "rows": [
+        [
+          {
+            "elements": [
+              {
+                "attributes": [
+                  {
+                    "type": "color",
+                    "value": "gray",
+                  },
+                ],
+                "text": "1:20",
+              },
+            ],
+            "type": "text",
+          },
+          {
+            "elements": [
+              {
+                "text": "./a/a2",
+              },
+            ],
+            "type": "text",
+          },
+        ],
         [
           {
             "elements": [
@@ -138,7 +162,7 @@ exports[`Case 02 > main() > should match the generated log output structure agai
                     "value": "yellow",
                   },
                 ],
-                "text": "1 line",
+                "text": "2 lines",
               },
             ],
             "type": "text",

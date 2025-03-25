@@ -11,8 +11,8 @@ function read(path: string): string {
 	return readFileSync(join(import.meta.dirname, path), "utf8");
 }
 
-describe("Case 04", () => {
-	beforeEach(async () => {
+describe("Case 06", () => {
+	beforeEach(() => {
 		const argvSpy = vi.spyOn(globalThis.process, "argv", "get");
 		const cwdSpy = vi.spyOn(globalThis.process, "cwd");
 		argvSpy.mockReturnValue(["nodePath", "entryPath", "./acrop.config.ts"]);
@@ -44,14 +44,16 @@ describe("Case 04", () => {
 				expect(config.scopes[0]?.scope).toEqual("./a/**/*");
 			});
 
-			test("should disallow in the scope", () => {
-				expect(config.scopes[0]?.rules[0]?.allowed).toEqual(["./a/a3"]);
+			test(`should restrict "./b" in the scope`, () => {
+				expect(config.scopes[0]?.rules[0]?.restricted).toEqual(["./b/**/*"]);
 			});
 
-			test("should disallow in the scope", () => {
-				expect(config.scopes[0]?.disallowSiblingImportsUnlessAllow).toEqual(
-					true,
-				);
+			test(`should allow "./a", "./b", "./c" in the scope`, () => {
+				expect(config.scopes[0]?.rules[1]?.allowed).toEqual([
+					"./a/**/*",
+					"./b/**/*",
+					"./c/**/*",
+				]);
 			});
 		});
 
@@ -64,6 +66,10 @@ describe("Case 04", () => {
 
 			test("should contain import statement for b1", () => {
 				expect(content).toContain("../b/b1");
+			});
+
+			test("should contain import statement for c1", () => {
+				expect(content).toContain("../c/c1");
 			});
 
 			test("should contain import statement for sibling file", () => {

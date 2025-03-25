@@ -1,7 +1,7 @@
 import { dirname, relative, resolve } from "node:path";
 import { minimatch } from "minimatch";
 
-import { calcAllowed } from "./calc-allowed";
+import { calcRules } from "./calc-rules";
 import type { ErrorReport } from "./error-report";
 import { findImportPaths } from "./find-import-paths";
 import type { importConfig } from "./import-config";
@@ -47,7 +47,7 @@ export function check(
 			end4();
 
 			const { ast, positions } = makeAstResult;
-			const allowed = calcAllowed(root, path.absolute, declaration);
+			const rules = calcRules(root, path.absolute, declaration);
 
 			const end5 = logger.start(`> > "${path.relative}" Find import paths`);
 			const infoArray = findImportPaths(ast, positions).map(
@@ -63,12 +63,20 @@ export function check(
 			end5();
 
 			const result = infoArray.map((info) => {
-				const isAllowed = allowed.reduce((acc, allowedPath): boolean => {
-					if (acc) {
-						return acc;
+				let isAllowed = false;
+				let matchFound = false;
+
+				for (const rule of rules) {
+					if (minimatch(info.path.relative, rule.pattern)) {
+						isAllowed = rule.type === "allowed";
+						matchFound = true;
+						break;
 					}
-					return minimatch(info.path.relative, allowedPath);
-				}, false);
+				}
+
+				if (!matchFound) {
+					isAllowed = false;
+				}
 
 				return {
 					path: info.path,
