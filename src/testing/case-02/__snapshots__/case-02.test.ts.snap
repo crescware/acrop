@@ -37,6 +37,7 @@ exports[`Case 02 > main() > should match the generated log output structure agai
       "alignment": [
         "left",
         "left",
+        "left",
       ],
       "rows": [
         [
@@ -62,6 +63,20 @@ exports[`Case 02 > main() > should match the generated log output structure agai
             ],
             "type": "text",
           },
+          {
+            "elements": [
+              {
+                "attributes": [
+                  {
+                    "type": "color",
+                    "value": "gray",
+                  },
+                ],
+                "text": "./a/**/*",
+              },
+            ],
+            "type": "text",
+          },
         ],
         [
           {
@@ -82,6 +97,20 @@ exports[`Case 02 > main() > should match the generated log output structure agai
             "elements": [
               {
                 "text": "./b/b1",
+              },
+            ],
+            "type": "text",
+          },
+          {
+            "elements": [
+              {
+                "attributes": [
+                  {
+                    "type": "color",
+                    "value": "gray",
+                  },
+                ],
+                "text": "./a/**/*",
               },
             ],
             "type": "text",

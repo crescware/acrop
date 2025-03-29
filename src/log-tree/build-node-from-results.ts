@@ -22,8 +22,17 @@ export function buildNodeFromResults(
 					],
 				},
 				{ type: "text", elements: [{ text: v.path.relative }] },
+				{
+					type: "text",
+					elements: [
+						{
+							text: v.scopeLabel,
+							attributes: [{ type: "color", value: "gray" }],
+						},
+					],
+				},
 			];
 		}),
-		alignment: ["left", "left"],
+		alignment: ["left", "left", "left"],
 	} satisfies TableNode;
 }

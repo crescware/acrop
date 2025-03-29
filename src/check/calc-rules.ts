@@ -1,4 +1,6 @@
 import { dirname, relative } from "node:path";
+
+import { assertExists, exists } from "../exists";
 import type { importConfig } from "../import-config";
 
 type Declaration = Awaited<ReturnType<typeof importConfig>>["scopes"][number];
@@ -6,6 +8,7 @@ type Declaration = Awaited<ReturnType<typeof importConfig>>["scopes"][number];
 export type Rule = Readonly<{
 	type: "allowed" | "restricted";
 	pattern: string;
+	scopeLabel: string;
 }>;
 
 function expandPatterns(patterns: readonly string[]): readonly string[] {
@@ -18,34 +21,55 @@ function expandPatterns(patterns: readonly string[]): readonly string[] {
 	});
 }
 
+function createScopeLabel(
+	scopeName: string,
+	ruleIndex: number,
+	ruleName: string | null,
+): string {
+	return ruleName ? ruleName : `${scopeName}:rule[${ruleIndex}]`;
+}
+
+function getRuleName(
+	rule: NonNullable<Declaration["rules"][number]>,
+): string | null {
+	if (!("name" in rule) || !exists(rule.name)) {
+		return null;
+	}
+	return rule.name.length === 0 ? null : rule.name;
+}
+
 function processSiblingRule(
 	rule: NonNullable<Declaration["rules"][number]>,
 	tsPath: string,
 	root: string,
-):
-	| readonly Readonly<{
-			type: "allowed" | "restricted";
-			pattern: string;
-	  }>[]
-	| null {
+	scopeName: string,
+	ruleIndex: number,
+): readonly Rule[] | null {
 	if (!("sibling" in rule)) {
 		return null;
 	}
 
 	const basePath = `./${relative(root, dirname(tsPath))}`;
 	const patterns = [`${basePath}/**/*`, basePath];
-
 	const ruleType = rule.sibling ? "allowed" : "restricted";
+	const ruleName = getRuleName(rule);
+	const scopeLabel = createScopeLabel(scopeName, ruleIndex, ruleName);
 
 	return patterns.map((pattern) => {
-		return { type: ruleType, pattern };
+		return {
+			type: ruleType,
+			pattern,
+			scopeLabel,
+		};
 	});
 }
 
 function processAllowedRule(
 	rule: NonNullable<Declaration["rules"][number]>,
 	relativePath: string,
-): readonly string[] {
+	scopeName: string,
+	ruleIndex: number,
+): readonly Rule[] {
 	if (!("allowed" in rule)) {
 		return [];
 	}
@@ -62,13 +86,22 @@ function processAllowedRule(
 		);
 	})();
 
-	return expandPatterns(paths);
+	const ruleName = getRuleName(rule);
+	const scopeLabel = createScopeLabel(scopeName, ruleIndex, ruleName);
+
+	return expandPatterns(paths).map((pattern) => ({
+		type: "allowed" as const,
+		pattern,
+		scopeLabel,
+	}));
 }
 
 function processRestrictedRule(
 	rule: NonNullable<Declaration["rules"][number]>,
 	relativePath: string,
-): readonly string[] {
+	scopeName: string,
+	ruleIndex: number,
+): readonly Rule[] {
 	if (!("restricted" in rule)) {
 		return [];
 	}
@@ -85,35 +118,63 @@ function processRestrictedRule(
 		);
 	})();
 
-	return expandPatterns(paths);
+	const ruleName = getRuleName(rule);
+	const scopeLabel = createScopeLabel(scopeName, ruleIndex, ruleName);
+
+	return expandPatterns(paths).map((pattern) => ({
+		type: "restricted" as const,
+		pattern,
+		scopeLabel,
+	}));
 }
+
+type RulesResult = Readonly<{
+	rules: readonly Rule[];
+	scope: string;
+}>;
 
 export function calcRules(
 	root: string,
 	tsPath: string,
 	declaration: Declaration,
-): readonly Rule[] {
+): RulesResult {
 	const relativePath = `./${relative(root, tsPath)}`;
 
 	const orderedRules: /* readwrite */ Rule[] = [];
 
-	for (const rule of declaration.rules) {
-		const siblingRules = processSiblingRule(rule, tsPath, root);
-		if (siblingRules !== null) {
+	for (let i = 0; i < declaration.rules.length; i++) {
+		const rule = declaration.rules[i];
+		assertExists(rule);
+
+		const siblingRules = processSiblingRule(
+			rule,
+			tsPath,
+			root,
+			declaration.scope,
+			i,
+		);
+
+		if (exists(siblingRules)) {
 			orderedRules.push(...siblingRules);
 			continue;
 		}
 
-		const allowedPaths = processAllowedRule(rule, relativePath);
-		for (const pattern of allowedPaths) {
-			orderedRules.push({ type: "allowed", pattern });
-		}
+		const allowedRules = processAllowedRule(
+			rule,
+			relativePath,
+			declaration.scope,
+			i,
+		);
+		orderedRules.push(...allowedRules);
 
-		const restrictedPaths = processRestrictedRule(rule, relativePath);
-		for (const pattern of restrictedPaths) {
-			orderedRules.push({ type: "restricted", pattern });
-		}
+		const restrictedRules = processRestrictedRule(
+			rule,
+			relativePath,
+			declaration.scope,
+			i,
+		);
+		orderedRules.push(...restrictedRules);
 	}
 
-	return orderedRules;
+	return { rules: orderedRules, scope: declaration.scope };
 }

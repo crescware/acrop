@@ -16,12 +16,15 @@ const glob$ = pipe(string(), minLength(1));
 const rule$ = union([
 	strictObject({
 		allowed: union([pipe(array(glob$), minLength(0)), function_()]),
+		name: optional(string()),
 	}),
 	strictObject({
 		restricted: union([pipe(array(glob$), minLength(0)), function_()]),
+		name: optional(string()),
 	}),
 	strictObject({
 		sibling: boolean(),
+		name: optional(string()),
 	}),
 ]);
 

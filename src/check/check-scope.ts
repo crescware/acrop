@@ -34,7 +34,10 @@ export function checkScope(
 		const end4 = logger.start(`> > "${path.relative}" Find import paths`);
 		const infoArray = findImportPaths(ast, positions).map(
 			(v): ReturnType<typeof findImportPaths>[number] => {
-				const relativePath = `./${relative(root, resolve(dirname(path.absolute), v.path.relative))}`;
+				const relativePath = `./${relative(
+					root,
+					resolve(dirname(path.absolute), v.path.relative),
+				)}`;
 				return {
 					path: { relative: relativePath },
 					line: v.line,
