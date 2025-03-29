@@ -7,4 +7,5 @@ export type AnalyzedResult = Readonly<{
 	line: number;
 	column: number;
 	isAllowed: boolean;
+	scopeLabel: string;
 }>;
