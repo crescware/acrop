@@ -26,6 +26,6 @@ export function analyze(
 		isAllowed,
 		line: info.line,
 		column: info.column,
-		scopeLabel: matchedRule?.scopeLabel || rulesResult.scope,
+		scopeLabel: matchedRule?.scopeLabel ?? rulesResult.scope,
 	};
 }
