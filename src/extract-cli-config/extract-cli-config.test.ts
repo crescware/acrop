@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 
 import { extractCliConfig } from "./extract-cli-config";
+import { defaultUnmatchedPatternsFlags } from "./unmatched-patterns-flags";
 
 describe("extractCliConfig()", () => {
 	let originalArgv: string[];
@@ -21,6 +22,7 @@ describe("extractCliConfig()", () => {
 			needsReportUnscoped: false,
 			verbose: false,
 			configPath: "path/to/config.ts",
+			unmatchedPatterns: { ...defaultUnmatchedPatternsFlags },
 		} satisfies ReturnType<typeof extractCliConfig>;
 
 		const actual = extractCliConfig();
@@ -35,6 +37,7 @@ describe("extractCliConfig()", () => {
 				needsReportUnscoped: true,
 				verbose: false,
 				configPath: "config.ts",
+				unmatchedPatterns: { ...defaultUnmatchedPatternsFlags },
 			} satisfies ReturnType<typeof extractCliConfig>;
 
 			const actual = extractCliConfig();
@@ -48,6 +51,7 @@ describe("extractCliConfig()", () => {
 				needsReportUnscoped: false,
 				verbose: true,
 				configPath: "config.ts",
+				unmatchedPatterns: { ...defaultUnmatchedPatternsFlags },
 			} satisfies ReturnType<typeof extractCliConfig>;
 
 			const actual = extractCliConfig();
@@ -61,6 +65,7 @@ describe("extractCliConfig()", () => {
 				needsReportUnscoped: true,
 				verbose: true,
 				configPath: "config.ts",
+				unmatchedPatterns: { ...defaultUnmatchedPatternsFlags },
 			} satisfies ReturnType<typeof extractCliConfig>;
 
 			const actual = extractCliConfig();
@@ -74,6 +79,7 @@ describe("extractCliConfig()", () => {
 				needsReportUnscoped: true,
 				verbose: true,
 				configPath: "config.ts",
+				unmatchedPatterns: { ...defaultUnmatchedPatternsFlags },
 			} satisfies ReturnType<typeof extractCliConfig>;
 
 			const actual = extractCliConfig();
@@ -87,6 +93,7 @@ describe("extractCliConfig()", () => {
 				needsReportUnscoped: false,
 				verbose: true,
 				configPath: "config.ts",
+				unmatchedPatterns: { ...defaultUnmatchedPatternsFlags },
 			} satisfies ReturnType<typeof extractCliConfig>;
 
 			const actual = extractCliConfig();
@@ -100,10 +107,60 @@ describe("extractCliConfig()", () => {
 				needsReportUnscoped: true,
 				verbose: false,
 				configPath: "config.ts",
+				unmatchedPatterns: { ...defaultUnmatchedPatternsFlags },
 			} satisfies ReturnType<typeof extractCliConfig>;
 
 			const actual = extractCliConfig();
 			expect(actual).toEqual(expected);
+		});
+	});
+
+	describe("Unmatched Patterns Option", () => {
+		test("should disable checking when '--unmatched-patterns off' is provided", () => {
+			process.argv.push("config.ts", "--unmatched-patterns", "off");
+
+			const expected = {
+				needsReportUnscoped: false,
+				verbose: false,
+				configPath: "config.ts",
+				unmatchedPatterns: { needsCheck: false, shouldFail: false },
+			} satisfies ReturnType<typeof extractCliConfig>;
+
+			const actual = extractCliConfig();
+			expect(actual).toEqual(expected);
+		});
+
+		test("should enable checking without failing when '--unmatched-patterns warn' is provided", () => {
+			process.argv.push("config.ts", "--unmatched-patterns", "warn");
+
+			const expected = {
+				needsReportUnscoped: false,
+				verbose: false,
+				configPath: "config.ts",
+				unmatchedPatterns: { needsCheck: true, shouldFail: false },
+			} satisfies ReturnType<typeof extractCliConfig>;
+
+			const actual = extractCliConfig();
+			expect(actual).toEqual(expected);
+		});
+
+		test("should enable checking and fail the build when '--unmatched-patterns error' is provided", () => {
+			process.argv.push("config.ts", "--unmatched-patterns", "error");
+
+			const expected = {
+				needsReportUnscoped: false,
+				verbose: false,
+				configPath: "config.ts",
+				unmatchedPatterns: { needsCheck: true, shouldFail: true },
+			} satisfies ReturnType<typeof extractCliConfig>;
+
+			const actual = extractCliConfig();
+			expect(actual).toEqual(expected);
+		});
+
+		test("should throw if '--unmatched-patterns' is supplied without a value", () => {
+			process.argv.push("config.ts", "--unmatched-patterns");
+			expect(() => extractCliConfig()).toThrow(/option requires argument/);
 		});
 	});
 
