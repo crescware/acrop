@@ -13,15 +13,9 @@ import { VerboseLogger } from "./verbose-logger";
 export async function main(): Promise<boolean> {
 	const end = ownedTimeSpan();
 
-	const {
-		needsReportUnscoped,
-		verbose,
-		configPath: unresolvedConfigPath,
-	} = extractCliConfig();
-
-	const logger = new VerboseLogger(verbose);
-
-	const configPath = calcConfigAbsolutePath(logger, unresolvedConfigPath);
+	const cliConfig = extractCliConfig();
+	const logger = new VerboseLogger(cliConfig.verbose);
+	const configPath = calcConfigAbsolutePath(logger, cliConfig.configPath);
 	const root = dirname(configPath);
 	const config = await importConfig(logger, configPath);
 	const tsFiles = getAllTsFiles(logger, root);
@@ -55,7 +49,7 @@ export async function main(): Promise<boolean> {
 		reports,
 		tsFiles,
 		scoped,
-		needsReportUnscoped,
+		cliConfig.needsReportUnscoped,
 		duration,
 		restrictedImports,
 	);
