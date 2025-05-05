@@ -1,5 +1,6 @@
 import { minimatch } from "minimatch";
 
+import type { UnmatchedPatternsTracker } from "../../unmatched-pattern-tracker";
 import type { Rule, calcRules } from "../calc-rules";
 import type { findImportPaths } from "../find-import-paths";
 import type { AnalyzedResult } from "./analyzed-result";
@@ -7,6 +8,7 @@ import type { AnalyzedResult } from "./analyzed-result";
 export function analyze(
 	rulesResult: ReturnType<typeof calcRules>,
 	info: ReturnType<typeof findImportPaths>[number],
+	trackerRef: UnmatchedPatternsTracker,
 ): AnalyzedResult {
 	let isAllowed = false;
 	let matchedRule: Rule | null = null;
@@ -16,8 +18,11 @@ export function analyze(
 		if (!matched) {
 			continue;
 		}
+
 		matchedRule = rule;
+		trackerRef.markAsMatched(matchedRule);
 		isAllowed = rule.type === "allowed";
+
 		break;
 	}
 

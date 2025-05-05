@@ -2,6 +2,7 @@ import { dirname, relative, resolve } from "node:path";
 
 import { exists } from "../exists";
 import type { Report } from "../log-tree";
+import type { UnmatchedPatternsTracker } from "../unmatched-pattern-tracker";
 import type { VerboseLogger } from "../verbose-logger";
 import { analyzeImportAccess } from "./analyze-import-access";
 import { calcRules } from "./calc-rules";
@@ -17,6 +18,7 @@ export function checkScope(
 	scoped: Set<string>,
 	errorsRef: /* readwrite */ ErrorReport[],
 	reports: /* readwrite */ Report[],
+	trackerRef: UnmatchedPatternsTracker,
 ): void {
 	for (const path of filtered) {
 		const end3 = logger.start(`> > "${path.relative}" Make ast`);
@@ -29,7 +31,7 @@ export function checkScope(
 		end3();
 
 		const { ast, positions } = makeAstResult;
-		const rules = calcRules(root, path.absolute, declaration);
+		const rules = calcRules(root, path.absolute, declaration, trackerRef);
 
 		const end4 = logger.start(`> > "${path.relative}" Find import paths`);
 		const infoArray = findImportPaths(ast, positions).map(
@@ -47,7 +49,7 @@ export function checkScope(
 		);
 		end4();
 
-		const analyzed = analyzeImportAccess(logger, rules, infoArray);
+		const analyzed = analyzeImportAccess(logger, rules, infoArray, trackerRef);
 
 		reports.push({ path, result: analyzed });
 		scoped.add(path.absolute);

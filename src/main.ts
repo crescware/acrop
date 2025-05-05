@@ -8,6 +8,7 @@ import { importConfig } from "./import-config";
 import { outputFromTree } from "./log-reports";
 import { buildTree } from "./log-tree";
 import { ownedTimeSpan } from "./owned-time-span";
+import { UnmatchedPatternsTracker } from "./unmatched-pattern-tracker";
 import { VerboseLogger } from "./verbose-logger";
 
 export async function main(): Promise<boolean> {
@@ -31,12 +32,41 @@ export async function main(): Promise<boolean> {
 		console.info(""); // blank
 	}
 
+	const tracker = new UnmatchedPatternsTracker();
+
 	const { scoped, errorsRef, reports } = check(
 		logger,
 		scopeDeclarations,
 		tsFiles,
 		root,
+		tracker,
 	);
+
+	let unmatchedPatternsCount = 0;
+	if (cliConfig.unmatchedPatterns.needsCheck) {
+		const unmatchedPatterns = tracker.getUnmatchedPatterns();
+		unmatchedPatternsCount = unmatchedPatterns.length;
+		if (0 < unmatchedPatternsCount) {
+			console.info(""); // blank
+			console.info(
+				`Found ${unmatchedPatternsCount} unused pattern(s) defined in rules:`,
+			);
+			// biome-ignore lint/complexity/noForEach: <explanation>
+			unmatchedPatterns.forEach((p) => {
+				console.info(
+					`  - ${p.scopeLabel} (rule[${p.ruleIndex.toString()}]): ${p.pattern}`,
+				);
+			});
+			console.info(""); // blank
+
+			if (cliConfig.unmatchedPatterns.shouldFail) {
+				console.info(
+					`Failing build due to unused patterns and "unmatchedPatterns.shouldFail: true" setting.`,
+				);
+				console.info(""); // blank
+			}
+		}
+	}
 
 	const duration = end();
 
@@ -58,6 +88,10 @@ export async function main(): Promise<boolean> {
 
 	if (hasOnlyScopes) {
 		console.info(`Failed due to "only: true" flag`);
+		return false;
+	}
+
+	if (0 < unmatchedPatternsCount && cliConfig.unmatchedPatterns.shouldFail) {
 		return false;
 	}
 
