@@ -1,3 +1,5 @@
+import arg from "arg";
+
 type CliConfig = Readonly<{
 	needsReportUnscoped: boolean;
 	verbose: boolean;
@@ -5,15 +7,19 @@ type CliConfig = Readonly<{
 }>;
 
 export function extractCliConfig(): CliConfig {
-	const args = process.argv.slice(2);
+	const parsed = arg(
+		{ "--unscoped": Boolean, "--verbose": Boolean },
+		{ argv: process.argv.slice(2), permissive: false },
+	);
 
-	const needsReportUnscoped = args.includes("--unscoped");
-	const verbose = args.includes("--verbose");
-
-	const configPath = args[0] ?? "";
-	if (configPath === "") {
+	const configPath = parsed._[0] as string | undefined;
+	if (configPath === "" || typeof configPath === "undefined") {
 		throw new Error("Configuration file not found");
 	}
 
-	return { needsReportUnscoped, verbose, configPath };
+	return {
+		needsReportUnscoped: Boolean(parsed["--unscoped"]),
+		verbose: Boolean(parsed["--verbose"]),
+		configPath,
+	};
 }

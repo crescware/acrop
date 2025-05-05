@@ -80,26 +80,26 @@ describe("extractCliConfig()", () => {
 			expect(actual).toEqual(expected);
 		});
 
-		test("should treat the first argument as configPath and still detect --verbose when it is first", () => {
+		test("should use the first non-flag argument as configPath when --verbose precedes it", () => {
 			process.argv.push("--verbose", "config.ts");
 
 			const expected = {
 				needsReportUnscoped: false,
 				verbose: true,
-				configPath: "--verbose",
+				configPath: "config.ts",
 			} satisfies ReturnType<typeof extractCliConfig>;
 
 			const actual = extractCliConfig();
 			expect(actual).toEqual(expected);
 		});
 
-		test("should treat the first argument as configPath and still detect --unscoped when it is first", () => {
+		test("should use the first non-flag argument as configPath when --unscoped precedes it", () => {
 			process.argv.push("--unscoped", "config.ts");
 
 			const expected = {
 				needsReportUnscoped: true,
 				verbose: false,
-				configPath: "--unscoped",
+				configPath: "config.ts",
 			} satisfies ReturnType<typeof extractCliConfig>;
 
 			const actual = extractCliConfig();
@@ -108,13 +108,18 @@ describe("extractCliConfig()", () => {
 	});
 
 	describe("Error Handling", () => {
-		test("should throw error if no arguments are provided (config path is missing)", () => {
+		test("should throw an error when no arguments are provided", () => {
 			expect(() => extractCliConfig()).toThrow("Configuration file not found");
 		});
 
-		test("should throw error if the first argument is an empty string", () => {
+		test("should throw an error when the first argument is an empty string", () => {
 			process.argv.push("");
 			expect(() => extractCliConfig()).toThrow("Configuration file not found");
+		});
+
+		test("should throw an error when an unknown flag is supplied", () => {
+			process.argv.push("config.ts", "--invalid");
+			expect(() => extractCliConfig()).toThrow(/unknown or unexpected option/);
 		});
 	});
 });
