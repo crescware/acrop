@@ -4,7 +4,13 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import type { config$ } from "../import-config/config";
 import { outputFromTree } from "../log-reports";
+import type { LogTree } from "../log-tree";
 import { main } from "../main";
+import {
+	expectDuration,
+	expectFilesChecked,
+	expectRestrictedImports,
+} from "./expect-utils";
 import { setupMainTest } from "./test-utils";
 
 vi.mock("../import-config", () => ({ importConfig: vi.fn() }));
@@ -35,15 +41,32 @@ describe("main() – syntax error file present", () => {
 		expect(success).toBe(true);
 	});
 
-	test("outputFromTree should contain a red-colored error node", () => {
-		const treeArg = vi.mocked(outputFromTree).mock.calls[0]?.[0];
-		const redNode = treeArg?.nodes.find(
-			(n: any) =>
-				n.type === "text" &&
-				n.elements?.[0]?.attributes?.some(
-					(a: any) => a.type === "color" && a.value === "red",
-				),
-		);
-		expect(redNode).toBeDefined();
+	test("outputFromTree should contain the exact expected tree", () => {
+		const expected = {
+			nodes: [
+				{
+					type: "text",
+					elements: [
+						{
+							text: expect.stringContaining("a/bad.ts"),
+							attributes: [{ type: "color", value: "red" }],
+						},
+					],
+					// biome-ignore lint/suspicious/noExplicitAny:
+					children: expect.any(Array) as any,
+				},
+				{
+					type: "table",
+					alignment: ["right", "left"],
+					rows: [
+						expectFilesChecked("green", 0, 1, 1),
+						expectRestrictedImports("green", 0),
+						expectDuration("green"),
+					],
+				},
+			],
+		} satisfies LogTree;
+
+		expect(vi.mocked(outputFromTree)).toHaveBeenNthCalledWith(1, expected);
 	});
 });
