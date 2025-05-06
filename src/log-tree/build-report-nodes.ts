@@ -1,5 +1,6 @@
-import type { LogNode, TextNode } from "./log-tree";
 import { buildNodeFromResults } from "./build-node-from-results";
+import { gray, space, textLine, underline } from "./element-utils";
+import type { LogNode } from "./log-tree";
 import type { Report } from "./report";
 
 export function buildReportNodes(
@@ -8,28 +9,13 @@ export function buildReportNodes(
 	return reports.flatMap(({ path, result }): readonly LogNode[] => {
 		const restricted = result.filter((v) => !v.isAllowed);
 
-		const textNode = {
-			type: "text",
-			elements: [
-				{
-					text: path.relative,
-					attributes: [
-						{ type: "modifier", value: "underline" },
-						{ type: "color", value: "gray" },
-					],
-				},
-				{
-					text: " ",
-				},
-				{
-					text: `(${restricted.length})`,
-					attributes: [{ type: "color", value: "gray" }],
-				},
-			],
-		} satisfies TextNode;
+		const textNode = textLine([
+			gray(underline(path.relative)),
+			space(),
+			gray(`(${restricted.length})`),
+		]);
 
 		const tableNode = buildNodeFromResults(restricted);
-
 		return tableNode === null ? [] : [textNode, tableNode];
 	});
 }

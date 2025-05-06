@@ -4,8 +4,14 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 import { importConfig } from "../import-config";
 import type { config$ } from "../import-config/config";
 import { outputFromTree } from "../log-reports";
+import type { LogTree } from "../log-tree";
 import { main } from "../main";
-import { expectFilesChecked } from "./expect-utils";
+import {
+	expectDuration,
+	expectFilesChecked,
+	expectRestrictedImports,
+	expectUnscopedFiles,
+} from "./expect-utils";
 import { setupMainTest } from "./test-utils";
 
 vi.mock("../import-config", () => ({ importConfig: vi.fn() }));
@@ -21,7 +27,7 @@ const { configFilePathAbs } = setupMainTest({
 	config: testConfig,
 	files: [
 		{ path: "a/a.ts", content: "" },
-		{ path: "b/b.ts", content: "" }, // ← unscoped
+		{ path: "b/b.ts", content: "" },
 	],
 });
 
@@ -29,38 +35,37 @@ describe("main() – --unscoped フラグがある場合", () => {
 	let success: boolean;
 
 	beforeEach(async () => {
-		/* setupMainTest の beforeEach が走ったあとにフラグを追加 */
 		process.argv.push("--unscoped");
 		success = await main();
 	});
 
-	test("should succeed (true)", () => {
+	test("should return true", () => {
 		expect(success).toBe(true);
 	});
 
-	test("config path が正しい", () => {
+	test("importConfig が正しいパスで呼ばれる", () => {
 		expect(vi.mocked(importConfig)).toHaveBeenCalledWith(
 			expect.anything(),
 			configFilePathAbs,
 		);
 	});
 
-	test("Unscoped Files ノードを含む", () => {
-		const treeArg = vi.mocked(outputFromTree).mock.calls[0][0];
-		expect(
-			treeArg.nodes.some(
-				(node: any) =>
-					node.type === "text" && node.elements?.[0]?.text === "Unscoped Files",
-			),
-		).toBe(true);
-	});
+	test("Summary は green（unscoped = 1）", () => {
+		const expected = {
+			nodes: [
+				...expectUnscopedFiles(["./b/b.ts"]),
+				{
+					type: "table",
+					alignment: ["right", "left"],
+					rows: [
+						expectFilesChecked("green", 1, 2, 1),
+						expectRestrictedImports("green", 0),
+						expectDuration("green"),
+					],
+				},
+			],
+		} satisfies LogTree;
 
-	test("summary 行の unscoped 数が 1", () => {
-		const expected = expectFilesChecked(1, 2, 1);
-		const treeArg = vi.mocked(outputFromTree).mock.calls[0][0];
-
-		// summary は常に最後の node
-		const summaryRows = treeArg.nodes.at(-1).rows;
-		expect(summaryRows[0]).toEqual(expected);
+		expect(vi.mocked(outputFromTree)).toHaveBeenCalledWith(expected);
 	});
 });

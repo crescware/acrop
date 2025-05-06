@@ -55,19 +55,20 @@ describe("main() – sibling: true (兄弟 import を許可)", () => {
 	});
 
 	test("Summary は green（制限行 0）", () => {
-		const expected: LogTree = {
+		const expected = {
 			nodes: [
 				{
 					type: "table",
 					alignment: ["right", "left"],
 					rows: [
-						expectFilesChecked(2, 2, 0),
-						expectRestrictedImports(0),
-						expectDuration(),
+						expectFilesChecked("green", 2, 2, 0),
+						expectRestrictedImports("green", 0),
+						expectDuration("green"),
 					],
 				},
 			],
-		};
+		} satisfies LogTree;
+
 		expect(vi.mocked(outputFromTree)).toHaveBeenCalledWith(expected);
 	});
 });

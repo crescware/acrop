@@ -1,3 +1,11 @@
+import {
+	blankLine,
+	elem,
+	gray,
+	space,
+	textLine,
+	underline,
+} from "./element-utils";
 import type { TextNode } from "./log-tree";
 
 type UnscopedFiles = readonly Readonly<{
@@ -10,30 +18,18 @@ export function buildUnscopedReportNode(
 	unscopedFilesCount: number,
 	unscopedFiles: UnscopedFiles,
 ): readonly TextNode[] {
-	return needsReportUnscoped
-		? ([
-				{
-					type: "text",
-					elements: [
-						{
-							text: "Unscoped Files",
-							attributes: [{ type: "modifier", value: "underline" }],
-						},
-						{ text: " " },
-						{
-							text: `(${unscopedFilesCount})`,
-							attributes: [{ type: "color", value: "gray" }],
-						},
-					],
-				},
-				{ type: "text", elements: [{ text: " " }] },
-				...unscopedFiles.map((v): TextNode => {
-					return {
-						type: "text",
-						elements: [{ text: v.relative }],
-					};
-				}),
-				{ type: "text", elements: [{ text: " " }] },
-			] satisfies readonly TextNode[])
-		: ([] satisfies readonly TextNode[]);
+	if (!needsReportUnscoped) {
+		return [];
+	}
+
+	return [
+		textLine([
+			underline("Unscoped Files"),
+			space(),
+			gray(`(${unscopedFilesCount})`),
+		]),
+		blankLine(),
+		...unscopedFiles.map((v) => textLine([elem(v.relative)])),
+		blankLine(),
+	] satisfies readonly TextNode[];
 }

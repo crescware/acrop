@@ -13,7 +13,7 @@ const testConfig: InferOutput<typeof config$>["default"] = {
 	scopes: [
 		{
 			scope: "./a/**/*",
-			only: true, // ← これが原因で失敗する
+			only: true,
 			rules: [{ allowed: ["./a/**/*"] }],
 		},
 		{

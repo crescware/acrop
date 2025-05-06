@@ -73,9 +73,9 @@ describe("main()", () => {
 							type: "table",
 							alignment: ["right", "left"],
 							rows: [
-								expectFilesChecked(1, 2, 1),
-								expectRestrictedImports(0),
-								expectDuration(),
+								expectFilesChecked("green", 1, 2, 1),
+								expectRestrictedImports("green", 0),
+								expectDuration("green"),
 							],
 						},
 					],

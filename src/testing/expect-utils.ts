@@ -1,7 +1,21 @@
 import type { StrictExtract } from "ts-essentials";
 import { expect } from "vitest";
 
-import type { LogTree } from "../log-tree";
+import {
+	type LogTree,
+	gray,
+	green,
+	headerCell,
+	space,
+	textLine,
+} from "../log-tree";
+import {
+	blankLine,
+	elem,
+	plural,
+	underline,
+	yellow,
+} from "../log-tree/element-utils";
 
 type Row = StrictExtract<
 	LogTree["nodes"][number],
@@ -9,79 +23,56 @@ type Row = StrictExtract<
 >["rows"][number];
 
 export function expectFilesChecked(
+	color: "green" | "yellow",
 	checked: number,
 	found: number,
 	unscoped: number,
 ): Row {
+	const colorize = color === "green" ? green : yellow;
+
 	return [
-		{
-			type: "text",
-			elements: [
-				{
-					text: "Files Checked",
-					attributes: [{ type: "color", value: "gray" }],
-				},
-			],
-		},
-		{
-			type: "text",
-			elements: [
-				{
-					text: `${checked} ${checked === 1 ? "file" : "files"}`,
-					attributes: [{ type: "color", value: "green" }],
-				},
-				{ text: " " },
-				{
-					text: `(${found} found, ${unscoped} unscoped)`,
-					attributes: [{ type: "color", value: "gray" }],
-				},
-			],
-		},
+		headerCell("Files Checked"),
+		textLine([
+			colorize([plural(checked, "file")].join(" ")),
+			space(),
+			gray(`(${found} found, ${unscoped} unscoped)`),
+		]),
 	];
 }
 
-export function expectRestrictedImports(lines: number): Row {
+export function expectRestrictedImports(
+	color: "green" | "yellow",
+	lines: number,
+): Row {
+	const colorize = color === "green" ? green : yellow;
+
 	return [
-		{
-			type: "text",
-			elements: [
-				{
-					text: "Restricted Imports",
-					attributes: [{ type: "color", value: "gray" }],
-				},
-			],
-		},
-		{
-			type: "text",
-			elements: [
-				{
-					text: `${lines} ${lines === 1 ? "line" : "lines"}`,
-					attributes: [{ type: "color", value: "green" }],
-				},
-			],
-		},
-	] as Row;
+		headerCell("Restricted Imports"),
+		textLine([colorize(plural(lines, "line"))]),
+	];
 }
 
-export function expectDuration(): Row {
+export function expectDuration(color: "green" | "yellow"): Row {
 	return [
-		{
-			type: "text",
-			elements: [
-				{
-					text: "Duration",
-					attributes: [{ type: "color", value: "gray" }],
-				},
-			],
-		},
-		{
-			type: "text",
-			elements: [
-				{
-					text: expect.stringMatching(/^\d+\.\d+ sec$/),
-					attributes: [{ type: "color", value: "green" }],
-				},
-			],
-		},
+		headerCell("Duration"),
+		textLine([
+			{
+				text: expect.stringMatching(/^\d+\.\d+ sec$/),
+				attributes: [{ type: "color", value: color }],
+			},
+		]),
+	];
+}
+
+export function pathHeader(path: string): LogTree["nodes"][number] {
+	return textLine([gray(underline(path)), space(), gray("(1)")]);
+}
+
+export function expectUnscopedFiles(files: string[]): LogTree["nodes"] {
+	return [
+		textLine([underline("Unscoped Files"), space(), gray(`(${files.length})`)]),
+		blankLine(),
+		...files.map((f) => textLine([elem(f)])),
+		blankLine(),
 	];
 }

@@ -49,7 +49,6 @@ export function setupMainTest({ configFileName, config, files }: SetupOptions) {
 			await writeFile(abs, content);
 		}
 
-		/* ── argv 注入 ───────────────────────────────── */
 		process.argv = ["/usr/bin/node", "/app/dist/index.mjs", configFileName];
 	});
 
