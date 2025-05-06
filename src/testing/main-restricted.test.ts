@@ -53,7 +53,7 @@ describe("main() – restricted import が存在する場合", () => {
 	test("LogTree 全体が期待どおり", () => {
 		const expected = {
 			nodes: [
-				pathHeader("./a/a.ts"),
+				pathHeader("./a/a.ts", 1),
 				{
 					type: "table",
 					alignment: ["left", "left", "left"],

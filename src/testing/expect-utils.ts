@@ -64,8 +64,11 @@ export function expectDuration(color: "green" | "yellow"): Row {
 	];
 }
 
-export function pathHeader(path: string): LogTree["nodes"][number] {
-	return textLine([gray(underline(path)), space(), gray("(1)")]);
+export function pathHeader(
+	path: string,
+	count: number,
+): LogTree["nodes"][number] {
+	return textLine([gray(underline(path)), space(), gray(`(${count})`)]);
 }
 
 export function expectUnscopedFiles(files: string[]): LogTree["nodes"] {
