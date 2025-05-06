@@ -1,5 +1,5 @@
 import type { InferOutput } from "valibot";
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import type { config$ } from "../import-config/config";
 import { main } from "../main";
@@ -12,7 +12,7 @@ const testConfig: InferOutput<typeof config$>["default"] = {
 	scopes: [
 		{
 			scope: "./a/**/*",
-			rules: [{ allowed: ["./a/**/*", "./unused/**/*"] }],
+			rules: [{ allowed: ["./a/**/*", "./b/**/*"] }],
 		},
 	],
 };
@@ -23,20 +23,92 @@ setupMainTest({
 	files: [{ path: "a/a.ts", content: "" }],
 });
 
-describe.each([
-	{ severity: "warn", expectSuccess: true },
-	{ severity: "error", expectSuccess: false },
-] as const)(
-	"main() – unmatched-patterns: $severity",
-	({ severity, expectSuccess }) => {
+describe("main()", () => {
+	describe("unmatched-patterns 'warn'", () => {
 		let success: boolean;
+		let spy: ReturnType<typeof vi.spyOn>;
+		let logs: string[];
+
 		beforeEach(async () => {
-			process.argv.push("--unmatched-patterns", severity);
+			logs = [];
+			spy = vi
+				.spyOn(console, "info")
+				.mockImplementation((...args: unknown[]) => {
+					logs.push(
+						args
+							.map((v) => (typeof v === "string" ? v : JSON.stringify(v)))
+							.join(" "),
+					);
+				});
+
+			process.argv.push("--unmatched-patterns", "warn");
 			success = await main();
 		});
 
-		test(`should return ${expectSuccess}`, () => {
-			expect(success).toBe(expectSuccess);
+		afterEach(() => {
+			spy.mockRestore();
 		});
-	},
-);
+
+		test("should return true", () => {
+			expect(success).toBe(true);
+		});
+
+		test("should print correct summary line with exact count", () => {
+			const expected = "Found 2 unused pattern(s) defined in rules:";
+			expect(logs).toContain(expected);
+		});
+
+		test("should NOT print 'Failing build due to …' line", () => {
+			const hasFailLine = logs.some((l) =>
+				l.includes(
+					'Failing build due to unused patterns and "unmatchedPatterns.shouldFail: true"',
+				),
+			);
+			expect(hasFailLine).toBe(false);
+		});
+	});
+
+	describe("main() – unmatched-patterns 'error'", () => {
+		let success: boolean;
+		let spy: ReturnType<typeof vi.spyOn>;
+		let logs: string[];
+
+		beforeEach(async () => {
+			logs = [];
+			spy = vi
+				.spyOn(console, "info")
+				.mockImplementation((...args: unknown[]) => {
+					logs.push(
+						args
+							.map((v) => (typeof v === "string" ? v : JSON.stringify(v)))
+							.join(" "),
+					);
+				});
+
+			process.argv.push("--unmatched-patterns", "error");
+			success = await main();
+		});
+
+		afterEach(() => {
+			spy.mockRestore();
+		});
+
+		test("should return false", () => {
+			expect(success).toBe(false);
+		});
+
+		test("should print correct summary line with exact count", () => {
+			const expected = "Found 2 unused pattern(s) defined in rules:";
+			expect(logs).toContain(expected);
+		});
+
+		test("should print 'Failing build due to …' line", () => {
+			const hasFailLine = logs.some((l) =>
+				l.includes(
+					'Failing build due to unused patterns and "unmatchedPatterns.shouldFail: true"',
+				),
+			);
+			expect(hasFailLine).toBe(true);
+		});
+	});
+});

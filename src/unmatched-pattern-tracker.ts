@@ -1,3 +1,5 @@
+import { canonicalize } from "./pattern/canonicalize";
+
 export type PatternInfo = Readonly<{
 	scopeLabel: string;
 	ruleIndex: number;
@@ -35,6 +37,7 @@ export class UnmatchedPatternsTracker {
 	}
 
 	#makeKey(scopeLabel: string, ruleIndex: number, pattern: string): string {
-		return JSON.stringify({ scopeLabel, ruleIndex, pattern });
+		const canonical = canonicalize(pattern);
+		return JSON.stringify({ scopeLabel, ruleIndex, pattern: canonical });
 	}
 }

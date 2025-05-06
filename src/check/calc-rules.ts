@@ -2,6 +2,7 @@ import { dirname, relative } from "node:path";
 
 import { assertExists, exists } from "../exists";
 import type { importConfig } from "../import-config";
+import { expandPatterns } from "../pattern/expand-patterns";
 import type { UnmatchedPatternsTracker } from "../unmatched-pattern-tracker";
 
 type Declaration = Awaited<ReturnType<typeof importConfig>>["scopes"][number];
@@ -12,15 +13,6 @@ export type Rule = Readonly<{
 	scopeLabel: string;
 	ruleIndex: number;
 }>;
-
-function expandPatterns(patterns: readonly string[]): readonly string[] {
-	return patterns.flatMap((pattern) => {
-		if (pattern.endsWith("/**/*")) {
-			return [pattern, pattern.replace(/\/\*\*\/\*$/, "")];
-		}
-		return [pattern, `${pattern}/**/*`];
-	});
-}
 
 function createScopeLabel(
 	scopeName: string,
