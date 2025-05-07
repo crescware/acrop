@@ -58,7 +58,7 @@ function processSiblingRule(
 			ruleIndex,
 		} as const satisfies Rule;
 
-		trackerRef.addPattern({ scopeLabel, ruleIndex, pattern });
+		trackerRef.addPattern({ scopeName, scopeLabel, ruleIndex, pattern });
 		rules.push(rule);
 	}
 
@@ -101,7 +101,7 @@ function processAllowedRule(
 			ruleIndex,
 		} as const satisfies Rule;
 
-		trackerRef.addPattern({ scopeLabel, ruleIndex, pattern });
+		trackerRef.addPattern({ scopeName, scopeLabel, ruleIndex, pattern });
 		rules.push(rule);
 	}
 
@@ -144,7 +144,7 @@ function processRestrictedRule(
 			ruleIndex,
 		} as const satisfies Rule;
 
-		trackerRef.addPattern({ scopeLabel, ruleIndex, pattern });
+		trackerRef.addPattern({ scopeName, scopeLabel, ruleIndex, pattern });
 		rules.push(rule);
 	}
 

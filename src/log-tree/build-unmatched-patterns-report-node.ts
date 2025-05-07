@@ -1,7 +1,15 @@
+import { assertExists } from "../exists";
 import type { UnmatchedPatternsFlags } from "../extract-cli-config/unmatched-patterns-flags";
 import type { PatternInfo } from "../unmatched-pattern-tracker";
-import { blankLine, elem, textLine } from "./element-utils";
-import type { LogNode } from "./log-tree";
+import {
+	blankLine,
+	elem,
+	gray,
+	space,
+	textLine,
+	underline,
+} from "./element-utils";
+import type { LogNode, TableNode } from "./log-tree";
 
 export function buildUnmatchedPatternsReportNode(
 	unmatchedPatterns: readonly PatternInfo[],
@@ -13,8 +21,6 @@ export function buildUnmatchedPatternsReportNode(
 
 	const nodes: LogNode[] = [];
 
-	nodes.push(blankLine()); // Add a blank line before the report
-
 	nodes.push(
 		textLine([
 			elem(
@@ -22,18 +28,38 @@ export function buildUnmatchedPatternsReportNode(
 			),
 		]),
 	);
+	nodes.push(blankLine());
 
+	const groupedPatterns = new Map<string, PatternInfo[]>();
 	for (const p of unmatchedPatterns) {
-		nodes.push(
-			textLine([
-				elem(
-					`  - ${p.scopeLabel} (rule[${p.ruleIndex.toString()}]): ${p.pattern}`,
-				),
-			]),
-		);
+		if (!groupedPatterns.has(p.scopeName)) {
+			groupedPatterns.set(p.scopeName, []);
+		}
+		const patterns = groupedPatterns.get(p.scopeName);
+		assertExists(patterns);
+		patterns.push(p);
 	}
 
-	nodes.push(blankLine()); // Add a blank line after the list
+	for (const [scopeName, patternsInScope] of groupedPatterns.entries()) {
+		nodes.push(
+			textLine([
+				gray(underline(scopeName)),
+				space(),
+				gray(`(${patternsInScope.length})`),
+			]),
+		);
+
+		const tableRows = patternsInScope.map((p) => [
+			textLine([gray(`rules[${p.ruleIndex.toString()}]`)]),
+			textLine([elem(p.pattern)]),
+		]);
+
+		nodes.push({
+			type: "table",
+			rows: tableRows,
+			alignment: ["left", "left"],
+		} satisfies TableNode);
+	}
 
 	if (cliFlags.shouldFail) {
 		nodes.push(
@@ -43,7 +69,7 @@ export function buildUnmatchedPatternsReportNode(
 				),
 			]),
 		);
-		nodes.push(blankLine()); // Add a blank line after the fail message
+		nodes.push(blankLine());
 	}
 
 	return nodes;

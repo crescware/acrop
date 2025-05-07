@@ -1,6 +1,7 @@
 import { canonicalize } from "./pattern/canonicalize";
 
 export type PatternInfo = Readonly<{
+	scopeName: string;
 	scopeLabel: string;
 	ruleIndex: number;
 	pattern: string;
@@ -18,8 +19,10 @@ export class UnmatchedPatternsTracker {
 		}
 	}
 
-	markAsMatched(info: PatternInfo): void {
-		const key = this.#makeKey(info.scopeLabel, info.ruleIndex, info.pattern);
+	markAsMatched(
+		rule: Pick<PatternInfo, "scopeLabel" | "ruleIndex" | "pattern">,
+	): void {
+		const key = this.#makeKey(rule.scopeLabel, rule.ruleIndex, rule.pattern);
 
 		if (this.#allPatterns.has(key)) {
 			this.#matchedPatternKeys.add(key);
