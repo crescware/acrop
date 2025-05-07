@@ -14,6 +14,10 @@ export type Rule = Readonly<{
 	ruleIndex: number;
 }>;
 
+function isExternalImportPath(v: string): boolean {
+	return !v.startsWith("./") && !v.startsWith("../");
+}
+
 function createScopeLabel(
 	scopeName: string,
 	ruleIndex: number,
@@ -154,6 +158,7 @@ function processRestrictedRule(
 type RulesResult = Readonly<{
 	rules: readonly Rule[];
 	scope: string;
+	hasExternalRule: boolean;
 }>;
 
 export function calcRules(
@@ -202,8 +207,13 @@ export function calcRules(
 		orderedRules.push(...restrictedRules);
 	}
 
+	const hasExternalRule = orderedRules.some((v) => {
+		return isExternalImportPath(v.pattern);
+	});
+
 	return {
 		rules: orderedRules,
 		scope: declaration.scope,
+		hasExternalRule,
 	};
 }

@@ -1,6 +1,4 @@
-type Path = Readonly<{
-	relative: string;
-}>;
+import type { Path } from "../../path-utils";
 
 export type AnalyzedResult = Readonly<{
 	path: Path;
