@@ -1,4 +1,5 @@
 import type { ErrorReport } from "../check/error-report";
+import { elem, red, textLine } from "./element-utils";
 import type { TextNode } from "./log-tree";
 
 export function buildNodesFromErrors(
@@ -7,18 +8,8 @@ export function buildNodesFromErrors(
 	return reports.map((report): TextNode => {
 		return {
 			type: "text",
-			elements: [
-				{
-					text: report.path,
-					attributes: [{ type: "color", value: "red" }],
-				},
-			],
-			children: report.errors.map((line): TextNode => {
-				return {
-					type: "text",
-					elements: [{ text: line }],
-				};
-			}),
+			elements: [red(report.path)],
+			children: report.errors.map((v): TextNode => textLine([elem(v)])),
 		};
 	});
 }

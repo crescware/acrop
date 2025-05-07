@@ -1,13 +1,16 @@
 import type { Alignment } from "table";
 
+export type Modifier = "underline";
+export type Color = "red" | "green" | "yellow" | "gray";
+
 type TextAttribute =
 	| Readonly<{
 			type: "modifier";
-			value: "underline";
+			value: Modifier;
 	  }>
 	| Readonly<{
 			type: "color";
-			value: "red" | "green" | "yellow" | "gray";
+			value: Color;
 	  }>;
 
 export type TextElement = Readonly<{

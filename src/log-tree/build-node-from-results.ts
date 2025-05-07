@@ -1,4 +1,5 @@
 import type { AnalyzedResult } from "../check/analyze-import-access";
+import { elem, gray, textLine } from "./element-utils";
 import type { TableNode } from "./log-tree";
 
 export function buildNodeFromResults(
@@ -8,31 +9,17 @@ export function buildNodeFromResults(
 		return null;
 	}
 
+	const rows = analyzedResults.map((v) => {
+		return [
+			textLine([gray(`${v.line}:${v.column}`)]),
+			textLine([elem(v.path.relative)]),
+			textLine([gray(v.scopeLabel)]),
+		];
+	});
+
 	return {
 		type: "table",
-		rows: analyzedResults.map((v) => {
-			return [
-				{
-					type: "text",
-					elements: [
-						{
-							text: [v.line, v.column].join(":"),
-							attributes: [{ type: "color", value: "gray" }],
-						},
-					],
-				},
-				{ type: "text", elements: [{ text: v.path.relative }] },
-				{
-					type: "text",
-					elements: [
-						{
-							text: v.scopeLabel,
-							attributes: [{ type: "color", value: "gray" }],
-						},
-					],
-				},
-			];
-		}),
+		rows,
 		alignment: ["left", "left", "left"],
 	} satisfies TableNode;
 }

@@ -2,6 +2,8 @@ import { dirname, relative } from "node:path";
 
 import { assertExists, exists } from "../exists";
 import type { importConfig } from "../import-config";
+import { expandPatterns } from "../pattern/expand-patterns";
+import type { UnmatchedPatternsTracker } from "../unmatched-pattern-tracker";
 
 type Declaration = Awaited<ReturnType<typeof importConfig>>["scopes"][number];
 
@@ -9,17 +11,8 @@ export type Rule = Readonly<{
 	type: "allowed" | "restricted";
 	pattern: string;
 	scopeLabel: string;
+	ruleIndex: number;
 }>;
-
-function expandPatterns(patterns: readonly string[]): readonly string[] {
-	return patterns.flatMap((pattern) => {
-		if (pattern.endsWith("/**/*")) {
-			return [pattern, pattern.replace(/\/\*\*\/\*$/, "")];
-		}
-
-		return [pattern, `${pattern}/**/*`];
-	});
-}
 
 function createScopeLabel(
 	scopeName: string,
@@ -44,6 +37,7 @@ function processSiblingRule(
 	root: string,
 	scopeName: string,
 	ruleIndex: number,
+	trackerRef: UnmatchedPatternsTracker,
 ): readonly Rule[] | null {
 	if (!("sibling" in rule)) {
 		return null;
@@ -55,13 +49,20 @@ function processSiblingRule(
 	const ruleName = getRuleName(rule);
 	const scopeLabel = createScopeLabel(scopeName, ruleIndex, ruleName);
 
-	return patterns.map((pattern) => {
-		return {
+	const rules: Rule[] = [];
+	for (const pattern of patterns) {
+		const rule = {
 			type: ruleType,
 			pattern,
 			scopeLabel,
-		};
-	});
+			ruleIndex,
+		} as const satisfies Rule;
+
+		trackerRef.addPattern({ scopeName, scopeLabel, ruleIndex, pattern });
+		rules.push(rule);
+	}
+
+	return rules;
 }
 
 function processAllowedRule(
@@ -69,6 +70,7 @@ function processAllowedRule(
 	relativePath: string,
 	scopeName: string,
 	ruleIndex: number,
+	trackerRef: UnmatchedPatternsTracker,
 ): readonly Rule[] {
 	if (!("allowed" in rule)) {
 		return [];
@@ -88,12 +90,22 @@ function processAllowedRule(
 
 	const ruleName = getRuleName(rule);
 	const scopeLabel = createScopeLabel(scopeName, ruleIndex, ruleName);
+	const expandedPatterns = expandPatterns(paths);
 
-	return expandPatterns(paths).map((pattern) => ({
-		type: "allowed" as const,
-		pattern,
-		scopeLabel,
-	}));
+	const rules: Rule[] = [];
+	for (const pattern of expandedPatterns) {
+		const rule = {
+			type: "allowed",
+			pattern,
+			scopeLabel,
+			ruleIndex,
+		} as const satisfies Rule;
+
+		trackerRef.addPattern({ scopeName, scopeLabel, ruleIndex, pattern });
+		rules.push(rule);
+	}
+
+	return rules;
 }
 
 function processRestrictedRule(
@@ -101,6 +113,7 @@ function processRestrictedRule(
 	relativePath: string,
 	scopeName: string,
 	ruleIndex: number,
+	trackerRef: UnmatchedPatternsTracker,
 ): readonly Rule[] {
 	if (!("restricted" in rule)) {
 		return [];
@@ -120,12 +133,22 @@ function processRestrictedRule(
 
 	const ruleName = getRuleName(rule);
 	const scopeLabel = createScopeLabel(scopeName, ruleIndex, ruleName);
+	const expandedPatterns = expandPatterns(paths);
 
-	return expandPatterns(paths).map((pattern) => ({
-		type: "restricted" as const,
-		pattern,
-		scopeLabel,
-	}));
+	const rules: Rule[] = [];
+	for (const pattern of expandedPatterns) {
+		const rule = {
+			type: "restricted",
+			pattern,
+			scopeLabel,
+			ruleIndex,
+		} as const satisfies Rule;
+
+		trackerRef.addPattern({ scopeName, scopeLabel, ruleIndex, pattern });
+		rules.push(rule);
+	}
+
+	return rules;
 }
 
 type RulesResult = Readonly<{
@@ -137,13 +160,13 @@ export function calcRules(
 	root: string,
 	tsPath: string,
 	declaration: Declaration,
+	trackerRef: UnmatchedPatternsTracker,
 ): RulesResult {
 	const relativePath = `./${relative(root, tsPath)}`;
 
-	const orderedRules: /* readwrite */ Rule[] = [];
+	const orderedRules: Rule[] = [];
 
-	for (let i = 0; i < declaration.rules.length; i++) {
-		const rule = declaration.rules[i];
+	for (const [index, rule] of declaration.rules.entries()) {
 		assertExists(rule);
 
 		const siblingRules = processSiblingRule(
@@ -151,7 +174,8 @@ export function calcRules(
 			tsPath,
 			root,
 			declaration.scope,
-			i,
+			index,
+			trackerRef,
 		);
 
 		if (exists(siblingRules)) {
@@ -163,7 +187,8 @@ export function calcRules(
 			rule,
 			relativePath,
 			declaration.scope,
-			i,
+			index,
+			trackerRef,
 		);
 		orderedRules.push(...allowedRules);
 
@@ -171,10 +196,14 @@ export function calcRules(
 			rule,
 			relativePath,
 			declaration.scope,
-			i,
+			index,
+			trackerRef,
 		);
 		orderedRules.push(...restrictedRules);
 	}
 
-	return { rules: orderedRules, scope: declaration.scope };
+	return {
+		rules: orderedRules,
+		scope: declaration.scope,
+	};
 }

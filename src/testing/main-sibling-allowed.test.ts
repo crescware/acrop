@@ -1,0 +1,73 @@
+import type { InferOutput } from "valibot";
+import { beforeEach, describe, expect, test, vi } from "vitest";
+
+import { importConfig } from "../import-config";
+import type { config$ } from "../import-config/config";
+import { outputFromTree } from "../log-reports";
+import type { LogTree } from "../log-tree";
+import { main } from "../main";
+import {
+	expectDuration,
+	expectFilesChecked,
+	expectRestrictedImports,
+} from "./expect-utils";
+import { setupMainTest } from "./test-utils";
+
+vi.mock("../import-config", () => ({ importConfig: vi.fn() }));
+vi.mock("../log-reports", () => ({ outputFromTree: vi.fn() }));
+
+const testConfig: InferOutput<typeof config$>["default"] = {
+	root: ".",
+	scopes: [
+		{
+			scope: "./a/**/*",
+			rules: [{ sibling: true }],
+		},
+	],
+};
+
+const { configFilePathAbs } = setupMainTest({
+	configFileName: "acrop.config.ts",
+	config: testConfig,
+	files: [
+		{ path: "a/x.ts", content: "import './y';" },
+		{ path: "a/y.ts", content: "export {};" },
+	],
+});
+
+describe("main() – sibling: true (兄弟 import を許可)", () => {
+	let success: boolean;
+
+	beforeEach(async () => {
+		success = await main();
+	});
+
+	test("should return true", () => {
+		expect(success).toEqual(true);
+	});
+
+	test("importConfig が正しいパスで呼ばれる", () => {
+		expect(vi.mocked(importConfig)).toHaveBeenCalledWith(
+			expect.anything(),
+			configFilePathAbs,
+		);
+	});
+
+	test("Summary は green（制限行 0）", () => {
+		const expected = {
+			nodes: [
+				{
+					type: "table",
+					alignment: ["right", "left"],
+					rows: [
+						expectFilesChecked("green", 2, 2, 0),
+						expectRestrictedImports("green", 0),
+						expectDuration("green"),
+					],
+				},
+			],
+		} satisfies LogTree;
+
+		expect(vi.mocked(outputFromTree)).toHaveBeenCalledWith(expected);
+	});
+});

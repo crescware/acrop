@@ -8,20 +8,15 @@ import { importConfig } from "./import-config";
 import { outputFromTree } from "./log-reports";
 import { buildTree } from "./log-tree";
 import { ownedTimeSpan } from "./owned-time-span";
+import { UnmatchedPatternsTracker } from "./unmatched-pattern-tracker";
 import { VerboseLogger } from "./verbose-logger";
 
 export async function main(): Promise<boolean> {
 	const end = ownedTimeSpan();
 
-	const {
-		needsReportUnscoped,
-		verbose,
-		configPath: unresolvedConfigPath,
-	} = extractCliConfig();
-
-	const logger = new VerboseLogger(verbose);
-
-	const configPath = calcConfigAbsolutePath(logger, unresolvedConfigPath);
+	const cliConfig = extractCliConfig();
+	const logger = new VerboseLogger(cliConfig.verbose);
+	const configPath = calcConfigAbsolutePath(logger, cliConfig.configPath);
 	const root = dirname(configPath);
 	const config = await importConfig(logger, configPath);
 	const tsFiles = getAllTsFiles(logger, root);
@@ -37,12 +32,17 @@ export async function main(): Promise<boolean> {
 		console.info(""); // blank
 	}
 
+	const tracker = new UnmatchedPatternsTracker();
+
 	const { scoped, errorsRef, reports } = check(
 		logger,
 		scopeDeclarations,
 		tsFiles,
 		root,
+		tracker,
 	);
+
+	const unmatchedPatterns = tracker.getUnmatchedPatterns();
 
 	const duration = end();
 
@@ -55,15 +55,24 @@ export async function main(): Promise<boolean> {
 		reports,
 		tsFiles,
 		scoped,
-		needsReportUnscoped,
 		duration,
 		restrictedImports,
+		unmatchedPatterns,
+		cliConfig,
 	);
 
 	outputFromTree(tree);
 
 	if (hasOnlyScopes) {
 		console.info(`Failed due to "only: true" flag`);
+		return false;
+	}
+
+	if (
+		cliConfig.unmatchedPatterns.needsCheck &&
+		cliConfig.unmatchedPatterns.shouldFail &&
+		0 < unmatchedPatterns.length
+	) {
 		return false;
 	}
 

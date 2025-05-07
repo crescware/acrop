@@ -26,7 +26,7 @@ export class VerboseLogger {
 
 		if (showStartLog) {
 			console.info(v);
-			// no return;
+			// no return
 		}
 
 		const end = timeSpan();
