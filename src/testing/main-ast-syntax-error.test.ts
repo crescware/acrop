@@ -1,4 +1,3 @@
-// src/testing/main-ast-syntax-error.test.ts
 import type { InferOutput } from "valibot";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -24,10 +23,7 @@ const testConfig: InferOutput<typeof config$>["default"] = {
 setupMainTest({
 	configFileName: "acrop.config.ts",
 	config: testConfig,
-	files: [
-		// わざと構文エラー
-		{ path: "a/bad.ts", content: "import" },
-	],
+	files: [{ path: "a/bad.ts", content: "import" }],
 });
 
 describe("main() – syntax error file present", () => {
@@ -38,7 +34,7 @@ describe("main() – syntax error file present", () => {
 	});
 
 	test("should succeed (true) even with parser errors", () => {
-		expect(success).toBe(true);
+		expect(success).toEqual(true);
 	});
 
 	test("outputFromTree should contain the exact expected tree", () => {

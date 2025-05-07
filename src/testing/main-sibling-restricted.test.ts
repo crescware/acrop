@@ -25,7 +25,7 @@ const { configFilePathAbs } = setupMainTest({
 	configFileName: "acrop.config.ts",
 	config: testConfig,
 	files: [
-		{ path: "a/x.ts", content: "import './y';" }, // 兄弟 import （禁止）
+		{ path: "a/x.ts", content: "import './y';" },
 		{ path: "a/y.ts", content: "export {};" },
 	],
 });
@@ -38,7 +38,7 @@ describe("main() – sibling: false (兄弟 import を禁止)", () => {
 	});
 
 	test("should return false (制限行があるため失敗)", () => {
-		expect(success).toBe(false);
+		expect(success).toEqual(false);
 	});
 
 	test("importConfig が正しいパスで呼ばれる", () => {
@@ -49,18 +49,17 @@ describe("main() – sibling: false (兄弟 import を禁止)", () => {
 	});
 
 	test("Summary は yellow（制限行 1）", () => {
-		const treeArg = vi.mocked(outputFromTree).mock.calls[0]?.[0];
-		expect(treeArg?.nodes.at(-1)).toEqual({
+		const expected = {
 			type: "table",
 			alignment: ["right", "left"],
 			rows: [
-				// ✔ ファイル数／発見数／未スコープ数
 				expectFilesChecked("yellow", 2, 2, 0),
-				// ✔ 制限行
 				expectRestrictedImports("yellow", 1),
-				// ✔ 所要時間
 				expectDuration("yellow"),
 			],
-		} as LogTree["nodes"][number]);
+		} satisfies LogTree["nodes"][number];
+
+		const treeArg = vi.mocked(outputFromTree).mock.calls[0]?.[0];
+		expect(treeArg?.nodes.at(-1)).toEqual(expected);
 	});
 });

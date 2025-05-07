@@ -16,7 +16,6 @@ import { setupMainTest } from "./test-utils";
 vi.mock("../import-config", () => ({ importConfig: vi.fn() }));
 vi.mock("../log-reports", () => ({ outputFromTree: vi.fn() }));
 
-/* ── sibling: true ────────────────────────────────────── */
 const testConfig: InferOutput<typeof config$>["default"] = {
 	root: ".",
 	scopes: [
@@ -31,7 +30,7 @@ const { configFilePathAbs } = setupMainTest({
 	configFileName: "acrop.config.ts",
 	config: testConfig,
 	files: [
-		{ path: "a/x.ts", content: "import './y';" }, // 兄弟 import （許可）
+		{ path: "a/x.ts", content: "import './y';" },
 		{ path: "a/y.ts", content: "export {};" },
 	],
 });
@@ -44,7 +43,7 @@ describe("main() – sibling: true (兄弟 import を許可)", () => {
 	});
 
 	test("should return true", () => {
-		expect(success).toBe(true);
+		expect(success).toEqual(true);
 	});
 
 	test("importConfig が正しいパスで呼ばれる", () => {

@@ -1,11 +1,19 @@
 import type { InferOutput } from "valibot";
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import type { config$ } from "../import-config/config";
+import { outputFromTree } from "../log-reports";
+import type { LogTree } from "../log-tree";
 import { main } from "../main";
+import {
+	expectDuration,
+	expectFilesChecked,
+	expectRestrictedImports,
+} from "./expect-utils";
 import { setupMainTest } from "./test-utils";
 
 vi.mock("../import-config", () => ({ importConfig: vi.fn() }));
+vi.mock("../log-reports", () => ({ outputFromTree: vi.fn() }));
 
 const testConfig: InferOutput<typeof config$>["default"] = {
 	root: ".",
@@ -29,29 +37,31 @@ describe.each([
 	{ severity: "error" as const },
 ])("main() – unmatched-patterns '%s' (no unused)", ({ severity }) => {
 	let success: boolean;
-	let spy: ReturnType<typeof vi.spyOn>;
 
 	beforeEach(async () => {
-		spy = vi.spyOn(console, "info").mockImplementation(() => {});
 		process.argv.push("--unmatched-patterns", severity);
 		success = await main();
 	});
 
-	afterEach(() => {
-		spy.mockRestore();
-	});
-
 	test("should succeed (true)", () => {
-		expect(success).toBe(true);
+		expect(success).toEqual(true);
 	});
 
-	test("should NOT print 'unused pattern(s)' summary", () => {
-		const printed = spy.mock.calls.some(
-			([m]) =>
-				typeof m === "string" &&
-				m.startsWith("Found") &&
-				m.includes("unused pattern"),
-		);
-		expect(printed).toBe(false);
+	test("outputFromTree should be called with correct summary (no unmatched report)", () => {
+		const expectedSummaryTable: LogTree["nodes"][number] = {
+			type: "table",
+			alignment: ["right", "left"],
+			rows: [
+				expectFilesChecked("green", 1, 1, 0),
+				expectRestrictedImports("green", 0),
+				expectDuration("green"),
+			],
+		};
+
+		const expected: LogTree = {
+			nodes: [expectedSummaryTable],
+		};
+
+		expect(vi.mocked(outputFromTree)).toHaveBeenCalledWith(expected);
 	});
 });

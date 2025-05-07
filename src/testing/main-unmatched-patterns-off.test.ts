@@ -1,21 +1,26 @@
 import type { InferOutput } from "valibot";
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import type { config$ } from "../import-config/config";
+import { outputFromTree } from "../log-reports";
+import type { LogTree } from "../log-tree";
 import { main } from "../main";
+import {
+	expectDuration,
+	expectFilesChecked,
+	expectRestrictedImports,
+} from "./expect-utils";
 import { setupMainTest } from "./test-utils";
 
 vi.mock("../import-config", () => ({ importConfig: vi.fn() }));
+vi.mock("../log-reports", () => ({ outputFromTree: vi.fn() }));
 
 const testConfig: InferOutput<typeof config$>["default"] = {
 	root: ".",
 	scopes: [
 		{
 			scope: "./a/**/*",
-			rules: [
-				{ allowed: ["./a/**/*"] },
-				{ allowed: ["./unused/**/*"] }, // ← 未使用パターン
-			],
+			rules: [{ allowed: ["./a/**/*"] }, { allowed: ["./unused/**/*"] }],
 		},
 	],
 };
@@ -28,31 +33,31 @@ setupMainTest({
 
 describe("main() – '--unmatched-patterns off'", () => {
 	let success: boolean;
-	let spy: ReturnType<typeof vi.spyOn>;
 
 	beforeEach(async () => {
-		spy = vi.spyOn(console, "info").mockImplementation(() => {
-			/* silent */
-		});
 		process.argv.push("--unmatched-patterns", "off");
 		success = await main();
 	});
 
-	afterEach(() => {
-		spy.mockRestore();
-	});
-
 	test("should succeed (true)", () => {
-		expect(success).toBe(true);
+		expect(success).toEqual(true);
 	});
 
-	test("should NOT print 'unused pattern(s)' summary", () => {
-		const printedUnused = spy.mock.calls.some(
-			([msg]) =>
-				typeof msg === "string" &&
-				msg.startsWith("Found") &&
-				msg.includes("unused pattern"),
-		);
-		expect(printedUnused).toBe(false);
+	test("outputFromTree should be called with correct summary (no unmatched report)", () => {
+		const expected: LogTree = {
+			nodes: [
+				{
+					type: "table",
+					alignment: ["right", "left"],
+					rows: [
+						expectFilesChecked("green", 1, 1, 0),
+						expectRestrictedImports("green", 0),
+						expectDuration("green"),
+					],
+				},
+			],
+		} satisfies LogTree;
+
+		expect(vi.mocked(outputFromTree)).toHaveBeenCalledWith(expected);
 	});
 });

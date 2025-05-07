@@ -40,7 +40,7 @@ describe("main() – restricted import が存在する場合", () => {
 	});
 
 	test("should return false", () => {
-		expect(success).toBe(false);
+		expect(success).toEqual(false);
 	});
 
 	test("importConfig が正しいパスで呼ばれる", () => {

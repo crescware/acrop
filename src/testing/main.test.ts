@@ -44,7 +44,7 @@ describe("main()", () => {
 		});
 
 		test("should return true", () => {
-			expect(success).toBe(true);
+			expect(success).toEqual(true);
 		});
 
 		describe("importConfig interactions", () => {

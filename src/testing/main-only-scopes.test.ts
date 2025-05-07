@@ -39,6 +39,6 @@ describe("main() – 'only: true' スコープがある場合", () => {
 	});
 
 	test("should return false (ビルド失敗)", () => {
-		expect(success).toBe(false);
+		expect(success).toEqual(false);
 	});
 });

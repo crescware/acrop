@@ -72,7 +72,7 @@ describe("main()", () => {
 		});
 
 		test("should return true", () => {
-			expect(success).toBe(false);
+			expect(success).toEqual(false);
 		});
 
 		describe("importConfig interactions", () => {

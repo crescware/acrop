@@ -1,6 +1,5 @@
 import type { StrictExtract } from "ts-essentials";
 import { expect } from "vitest";
-
 import {
 	type LogTree,
 	gray,
@@ -16,6 +15,7 @@ import {
 	underline,
 	yellow,
 } from "../log-tree/element-utils";
+import type {} from "../log-tree/log-tree";
 
 type Row = StrictExtract<
 	LogTree["nodes"][number],

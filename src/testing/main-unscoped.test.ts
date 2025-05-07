@@ -40,7 +40,7 @@ describe("main() – --unscoped フラグがある場合", () => {
 	});
 
 	test("should return true", () => {
-		expect(success).toBe(true);
+		expect(success).toEqual(true);
 	});
 
 	test("importConfig が正しいパスで呼ばれる", () => {
