@@ -1,1 +1,1 @@
-export { extractCliConfig } from "./extract-cli-config";
+export { type CliConfig, extractCliConfig } from "./extract-cli-config";

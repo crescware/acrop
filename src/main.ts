@@ -42,31 +42,7 @@ export async function main(): Promise<boolean> {
 		tracker,
 	);
 
-	let unmatchedPatternsCount = 0;
-	if (cliConfig.unmatchedPatterns.needsCheck) {
-		const unmatchedPatterns = tracker.getUnmatchedPatterns();
-		unmatchedPatternsCount = unmatchedPatterns.length;
-		if (0 < unmatchedPatternsCount) {
-			console.info(""); // blank
-			console.info(
-				`Found ${unmatchedPatternsCount} unused pattern(s) defined in rules:`,
-			);
-			// biome-ignore lint/complexity/noForEach: <explanation>
-			unmatchedPatterns.forEach((p) => {
-				console.info(
-					`  - ${p.scopeLabel} (rule[${p.ruleIndex.toString()}]): ${p.pattern}`,
-				);
-			});
-			console.info(""); // blank
-
-			if (cliConfig.unmatchedPatterns.shouldFail) {
-				console.info(
-					`Failing build due to unused patterns and "unmatchedPatterns.shouldFail: true" setting.`,
-				);
-				console.info(""); // blank
-			}
-		}
-	}
+	const unmatchedPatterns = tracker.getUnmatchedPatterns();
 
 	const duration = end();
 
@@ -79,9 +55,10 @@ export async function main(): Promise<boolean> {
 		reports,
 		tsFiles,
 		scoped,
-		cliConfig.needsReportUnscoped,
 		duration,
 		restrictedImports,
+		unmatchedPatterns,
+		cliConfig,
 	);
 
 	outputFromTree(tree);
@@ -91,7 +68,11 @@ export async function main(): Promise<boolean> {
 		return false;
 	}
 
-	if (0 < unmatchedPatternsCount && cliConfig.unmatchedPatterns.shouldFail) {
+	if (
+		cliConfig.unmatchedPatterns.needsCheck &&
+		cliConfig.unmatchedPatterns.shouldFail &&
+		0 < unmatchedPatterns.length
+	) {
 		return false;
 	}
 

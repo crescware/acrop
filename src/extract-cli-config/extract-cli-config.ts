@@ -6,7 +6,7 @@ import {
 	defaultUnmatchedPatternsFlags,
 } from "./unmatched-patterns-flags";
 
-type CliConfig = Readonly<{
+export type CliConfig = Readonly<{
 	needsReportUnscoped: boolean;
 	verbose: boolean;
 	configPath: string;
