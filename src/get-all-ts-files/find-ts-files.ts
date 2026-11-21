@@ -1,6 +1,6 @@
-import type ignore from "ignore";
 import { readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
+import type ignore from "ignore";
 
 export function findTsFiles(
 	rootDir: string,

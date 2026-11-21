@@ -1,0 +1,22 @@
+{
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"plugins": ["oxc", "typescript", "unicorn", "vitest"],
+	"env": { "node": true },
+	"categories": { "correctness": "error" },
+	"ignorePatterns": ["/.next/", "/dist/", "/coverage/"],
+	"rules": {
+		"eslint/curly": "error",
+		"eslint/default-case": "error",
+		"eslint/no-console": ["error", { "allow": ["error", "info"] }],
+		"eslint/no-restricted-globals": ["error", "error", "event", "isNaN"],
+		"eslint/no-useless-concat": "error",
+		"oxc/no-const-enum": "error",
+		"typescript/no-explicit-any": "error",
+		"unicorn/new-for-builtins": "error",
+		"unicorn/prefer-date-now": "error",
+		"unicorn/prefer-export-from": "error",
+		"unicorn/require-number-to-fixed-digits-argument": "error",
+		"vitest/no-focused-tests": "error",
+		"vitest/require-mock-type-parameters": "off"
+	}
+}

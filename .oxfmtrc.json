@@ -1,0 +1,11 @@
+{
+	"$schema": "./node_modules/oxfmt/configuration_schema.json",
+	"useTabs": true,
+	"printWidth": 80,
+	"sortImports": {
+		"newlinesBetween": false,
+		"partitionByNewline": true
+	},
+	"sortPackageJson": false,
+	"ignorePatterns": ["/.next/", "/dist/", "/coverage/", "/pnpm-lock.yaml"]
+}
