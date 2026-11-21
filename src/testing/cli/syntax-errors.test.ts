@@ -1,7 +1,7 @@
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
-import { createCliFixture } from "./cli-fixture";
+import { createCliFixture, expectReport } from "./cli-fixture";
 
 describe("CLI syntax errors in overlapping scopes", () => {
 	const { buildCli, removeBuild, runCli } = createCliFixture();
@@ -44,5 +44,18 @@ describe("CLI syntax errors in overlapping scopes", () => {
 		expect(result.lines).toContainEqual(
 			expect.stringMatching(/expected.*from.*EOF/i),
 		);
+	});
+
+	test("prints syntax errors first and exits successfully when they are the only problem", () => {
+		const syntaxOnly = runCli(
+			'[{ scope: "./src/*", rules: [{ allowed: ["./lib"] }] }]',
+			{ "src/bad.ts": "import", "src/good.ts": "import '../lib/x';" },
+		);
+		expectReport(syntaxOnly, 0, [
+			join(syntaxOnly.project, "src/bad.ts"),
+			expect.stringMatching(/expected.*from.*EOF/i),
+			"Files Checked 1 file (2 found, 1 unscoped)",
+			"Restricted Imports 0 lines",
+		]);
 	});
 });

@@ -51,4 +51,52 @@ describe("CLI configuration and file discovery", () => {
 			"Restricted Imports 1 line",
 		]);
 	});
+
+	const unusedScopes =
+		'[{ scope: "./src/*", rules: [{ allowed: ["./unused"] }] }]';
+	const summary = [
+		"Files Checked 1 file (1 found, 0 unscoped)",
+		"Restricted Imports 0 lines",
+	];
+
+	test("accepts --unmatched-patterns=<mode>", () => {
+		const result = runCli(unusedScopes, { "src/a.ts": "" }, [
+			"--unmatched-patterns=warn",
+		]);
+		expectReport(result, 0, [
+			"Found 1 unused pattern(s) defined in rules:",
+			"./src/* (1)",
+			"rules[0] ./unused",
+			...summary,
+		]);
+	});
+
+	test("--verbose logs the timing of each step before the report", () => {
+		const result = runCli(unusedScopes, { "src/a.ts": "" }, ["--verbose"]);
+		const timing = (step: string) => {
+			const escaped = step.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+			return expect.stringMatching(
+				new RegExp(`^${escaped}: \\d+(\\.\\d+)? ms$`),
+			);
+		};
+		expect(result.stderr).toBe("");
+		expect(result.status).toBe(0);
+		expect(result.lines).toEqual([
+			timing("Resolve config path"),
+			"Import config",
+			timing("> Transform config file"),
+			timing("> Write js config file"),
+			timing("Import config"),
+			timing("Find TypeScript files"),
+			"Check files",
+			timing('> > "./src/a.ts" Match file'),
+			timing('> "./src/*" Matched file in scope'),
+			timing('> > "./src/a.ts" Make ast'),
+			timing('> > "./src/a.ts" Find import paths'),
+			timing("> > Analyze import access"),
+			timing("Check files"),
+			...summary,
+			"Exiting with code 0",
+		]);
+	});
 });
