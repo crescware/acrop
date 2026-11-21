@@ -2,7 +2,6 @@ import { canonicalize } from "./pattern/canonicalize";
 
 export type PatternInfo = Readonly<{
 	scopeName: string;
-	scopeLabel: string;
 	ruleIndex: number;
 	pattern: string;
 }>;
@@ -12,17 +11,15 @@ export class UnmatchedPatternsTracker {
 	readonly #matchedPatternKeys: Set<string> = new Set();
 
 	addPattern(info: PatternInfo): void {
-		const key = this.#makeKey(info.scopeLabel, info.ruleIndex, info.pattern);
+		const key = this.#makeKey(info);
 
 		if (!this.#allPatterns.has(key)) {
 			this.#allPatterns.set(key, info);
 		}
 	}
 
-	markAsMatched(
-		rule: Pick<PatternInfo, "scopeLabel" | "ruleIndex" | "pattern">,
-	): void {
-		const key = this.#makeKey(rule.scopeLabel, rule.ruleIndex, rule.pattern);
+	markAsMatched(info: PatternInfo): void {
+		const key = this.#makeKey(info);
 
 		if (this.#allPatterns.has(key)) {
 			this.#matchedPatternKeys.add(key);
@@ -39,8 +36,8 @@ export class UnmatchedPatternsTracker {
 		return unmatched;
 	}
 
-	#makeKey(scopeLabel: string, ruleIndex: number, pattern: string): string {
+	#makeKey({ scopeName, ruleIndex, pattern }: PatternInfo): string {
 		const canonical = canonicalize(pattern);
-		return JSON.stringify({ scopeLabel, ruleIndex, pattern: canonical });
+		return JSON.stringify({ scopeName, ruleIndex, pattern: canonical });
 	}
 }

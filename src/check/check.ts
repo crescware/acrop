@@ -26,24 +26,24 @@ export function check(
 	const errorsRef = [] as ErrorReport[];
 	const reports = [] as Report[];
 
+	const remaining = new Set(tsFiles);
 	for (const declaration of scopes) {
 		const end2 = logger.start(`> "${declaration.scope}" Matched file in scope`);
-		const filtered = tsFiles.filter((tsFile): boolean => {
-			const end3 = logger.start(`> > "${tsFile.relative}" Match file`);
-			if (scoped.has(tsFile.absolute)) {
-				end3();
-				return false;
+		const matchedFiles: (typeof tsFiles)[number][] = [];
+		for (const file of remaining) {
+			const end3 = logger.start(`> > "${file.relative}" Match file`);
+			if (minimatch(file.relative, declaration.scope)) {
+				matchedFiles.push(file);
+				remaining.delete(file);
 			}
-			const ret = minimatch(tsFile.relative, declaration.scope);
 			end3();
-			return ret;
-		});
+		}
 		end2();
 
 		checkScope(
 			logger,
 			declaration,
-			filtered,
+			matchedFiles,
 			root,
 			scoped,
 			errorsRef,

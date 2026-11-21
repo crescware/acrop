@@ -35,14 +35,12 @@ describe("CLI syntax errors in overlapping scopes", () => {
 		);
 	});
 
-	// Known defect: each matching scope currently emits the same parse error.
-	test.fails("prints the diagnostic for the bad file once", () => {
+	test("prints the diagnostic for the bad file once", () => {
 		const path = join(result.project, "src/bad.ts");
 		expect(result.lines.filter((line) => line === path)).toHaveLength(1);
 	});
 
-	// Known defect: the rendered diagnostic currently drops the parser's message.
-	test.fails("includes the parser's reason for skipping the file", () => {
+	test("includes the parser's reason for skipping the file", () => {
 		expect(result.lines).toContainEqual(
 			expect.stringMatching(/expected.*from.*EOF/i),
 		);
