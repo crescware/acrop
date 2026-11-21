@@ -43,15 +43,15 @@ export function createCliFixture() {
 	}
 
 	function runCli(
-		scopes: string | undefined,
+		scopes: string,
 		files: Record<string, string>,
 		flags: string[] = [],
 	): CliResult {
 		const config = "acrop.config.ts";
-		const fixture = { ...files };
-		if (scopes !== undefined) {
-			fixture[config] = `export default { root: ".", scopes: ${scopes} };`;
-		}
+		const fixture = {
+			...files,
+			[config]: `export default { root: ".", scopes: ${scopes} };`,
+		};
 		return runWithArgs(fixture, [join("project", config), ...flags]);
 	}
 

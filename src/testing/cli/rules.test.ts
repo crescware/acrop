@@ -29,62 +29,78 @@ describe("CLI scope and rule selection", () => {
 	const narrow = { scope: "./src/domain/*", rules: [allow] };
 	const broad = { scope: "./src/**/*", rules: [restrict] };
 
+	const domainFiles = { "src/domain/a.ts": "import '../../ui/x';" };
+	const domainSummary = "Files Checked 1 file (1 found, 0 unscoped)";
+
 	test.each([
-		{ order: "narrow scope first", scopes: [narrow, broad], restricted: false },
-		{ order: "broad scope first", scopes: [broad, narrow], restricted: true },
+		{ order: "narrow scope first", scopes: [narrow, broad] },
 		{
 			order: "allow rule first",
 			scopes: [{ ...narrow, rules: [allow, restrict] }],
-			restricted: false,
 		},
+	])("allows the import with $order", ({ scopes }) => {
+		const result = runCli(JSON.stringify(scopes), domainFiles);
+		expectReport(result, 0, [domainSummary, "Restricted Imports 0 lines"]);
+	});
+
+	test.each([
+		{ order: "broad scope first", scopes: [broad, narrow] },
 		{
 			order: "restrict rule first",
 			scopes: [{ ...narrow, rules: [restrict, allow] }],
-			restricted: true,
 		},
-	])("uses the first match with $order", ({ scopes, restricted }) => {
-		const result = runCli(JSON.stringify(scopes), {
-			"src/domain/a.ts": "import '../../ui/x';",
-		});
-		expectReport(result, restricted ? 1 : 0, [
-			...(restricted
-				? ["./src/domain/a.ts (1)", "1:8 ./ui/x UI boundary"]
-				: []),
-			"Files Checked 1 file (1 found, 0 unscoped)",
-			restricted ? "Restricted Imports 1 line" : "Restricted Imports 0 lines",
+	])("reports the restricted import with $order", ({ scopes }) => {
+		const result = runCli(JSON.stringify(scopes), domainFiles);
+		expectReport(result, 1, [
+			"./src/domain/a.ts (1)",
+			"1:8 ./ui/x UI boundary",
+			domainSummary,
+			"Restricted Imports 1 line",
 		]);
 	});
 
-	test.each([true, false])(
-		"processes both only scopes when they contain violations: %s",
-		(hasViolations) => {
-			const scopes = ["ordinary", "first", "second"].map((dir) => ({
-				scope: `./${dir}/*`,
-				only: dir !== "ordinary",
-				rules: [restrict],
-			}));
-			const source = "import '../ui/x';";
-			const result = runCli(JSON.stringify(scopes), {
+	describe("two only scopes", () => {
+		const scopes = JSON.stringify([
+			{ scope: "./ordinary/*", only: false, rules: [restrict] },
+			{ scope: "./first/*", only: true, rules: [restrict] },
+			{ scope: "./second/*", only: true, rules: [restrict] },
+		]);
+		const source = "import '../ui/x';";
+		const onlyStart =
+			'Found 2 scope(s) with "only: true", processing only these scopes';
+		const filesChecked = "Files Checked 2 files (3 found, 1 unscoped)";
+		const onlyEnd = 'Failed due to "only: true" flag';
+
+		function checkSelectedScopes(selectedSource: string) {
+			return runCli(scopes, {
 				"ordinary/a.ts": source,
-				"first/a.ts": hasViolations ? source : "",
-				"second/a.ts": hasViolations ? source : "",
+				"first/a.ts": selectedSource,
+				"second/a.ts": selectedSource,
 			});
+		}
+
+		test("reports violations in both selected scopes", () => {
+			const result = checkSelectedScopes(source);
 			expectReport(result, 1, [
-				'Found 2 scope(s) with "only: true", processing only these scopes',
-				...(hasViolations
-					? [
-							"./first/a.ts (1)",
-							"1:8 ./ui/x UI boundary",
-							"./second/a.ts (1)",
-							"1:8 ./ui/x UI boundary",
-						]
-					: []),
-				"Files Checked 2 files (3 found, 1 unscoped)",
-				hasViolations
-					? "Restricted Imports 2 lines"
-					: "Restricted Imports 0 lines",
-				'Failed due to "only: true" flag',
+				onlyStart,
+				"./first/a.ts (1)",
+				"1:8 ./ui/x UI boundary",
+				"./second/a.ts (1)",
+				"1:8 ./ui/x UI boundary",
+				filesChecked,
+				"Restricted Imports 2 lines",
+				onlyEnd,
 			]);
-		},
-	);
+		});
+
+		test("fails for only even when the sole violation is outside the selected scopes", () => {
+			const result = checkSelectedScopes("");
+			expectReport(result, 1, [
+				onlyStart,
+				filesChecked,
+				"Restricted Imports 0 lines",
+				onlyEnd,
+			]);
+		});
+	});
 });

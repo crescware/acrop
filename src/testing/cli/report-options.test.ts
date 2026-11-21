@@ -7,81 +7,110 @@ describe("CLI report options", () => {
 	beforeAll(buildCli);
 	afterAll(removeBuild);
 
-	const outcomes = [
-		{ restricted: false, unused: false },
-		{ restricted: true, unused: false },
-		{ restricted: false, unused: true },
-		{ restricted: true, unused: true },
+	const files = { "src/a.ts": "import '../lib/x';", "outside.ts": "" };
+	const allowed = { allowed: ["./lib"] };
+	const restricted = { restricted: ["./lib"], name: "block lib" };
+	const unused = { allowed: ["./unused"] };
+	const unusedReport = [
+		"Found 1 unused pattern(s) defined in rules:",
+		"./src/* (1)",
+		"rules[1] ./unused",
 	];
-	const cases = [];
-	for (const mode of ["omitted", "off", "warn", "error"]) {
-		for (const unscoped of [false, true]) {
-			for (const only of [false, true]) {
-				for (const outcome of outcomes) {
-					cases.push({ mode, unscoped, only, ...outcome });
-				}
-			}
-		}
-	}
+	const restrictedReport = ["./src/a.ts (1)", "1:8 ./lib/x block lib"];
+	const filesChecked = "Files Checked 1 file (2 found, 1 unscoped)";
+	const onlyStart =
+		'Found 1 scope(s) with "only: true", processing only these scopes';
+	const onlyEnd = 'Failed due to "only: true" flag';
 
-	test.each(cases)(
-		"mode=$mode, unscoped=$unscoped, only=$only, restricted=$restricted, unused=$unused",
-		({ mode, unscoped, only, restricted, unused }) => {
-			const flags = unscoped ? ["--unscoped"] : [];
-			if (mode !== "omitted") {
-				flags.push("--unmatched-patterns", mode);
-			}
-
-			const rules = [
-				restricted
-					? { restricted: ["./lib"], name: "block lib" }
-					: { allowed: ["./lib"] },
-			];
-			if (unused) {
-				rules.push({ allowed: ["./unused"] });
-			}
-			const result = runCli(
-				JSON.stringify([{ scope: "./src/*", only, rules }]),
-				{
-					"src/a.ts": "import '../lib/x';",
-					"outside.ts": "",
-				},
-				flags,
-			);
-
-			const expected: string[] = [];
-			if (only) {
-				expected.push(
-					'Found 1 scope(s) with "only: true", processing only these scopes',
-				);
-			}
-			if (restricted) {
-				expected.push("./src/a.ts (1)", "1:8 ./lib/x block lib");
-			}
-			if (unscoped) {
-				expected.push("Unscoped Files (1)", "./outside.ts");
-			}
-			if (unused && (mode === "warn" || mode === "error")) {
-				expected.push(
-					"Found 1 unused pattern(s) defined in rules:",
-					"./src/* (1)",
-					"rules[1] ./unused",
-				);
-			}
-			const unusedError = unused && mode === "error";
-			if (unusedError) {
-				expected.push(
-					'Failing build due to unused patterns and "unmatchedPatterns.shouldFail: true" setting.',
-				);
-			}
-			expected.push(
-				"Files Checked 1 file (2 found, 1 unscoped)",
-				restricted ? "Restricted Imports 1 line" : "Restricted Imports 0 lines",
-			);
-			if (only) {
-				expected.push('Failed due to "only: true" flag');
-			}
-			expectReport(result, restricted || unusedError || only ? 1 : 0, expected);
+	describe.each([
+		{ mode: "omitted", flags: [], unusedLines: [], unusedStatus: 0 },
+		{
+			mode: "off",
+			flags: ["--unmatched-patterns", "off"],
+			unusedLines: [],
+			unusedStatus: 0,
 		},
-	);
+		{
+			mode: "warn",
+			flags: ["--unmatched-patterns", "warn"],
+			unusedLines: unusedReport,
+			unusedStatus: 0,
+		},
+		{
+			mode: "error",
+			flags: ["--unmatched-patterns", "error"],
+			unusedLines: [
+				...unusedReport,
+				'Failing build due to unused patterns and "unmatchedPatterns.shouldFail: true" setting.',
+			],
+			unusedStatus: 1,
+		},
+	])("--unmatched-patterns $mode", ({ flags, unusedLines, unusedStatus }) => {
+		describe.each([
+			{
+				name: "allowed import",
+				rules: [allowed],
+				importLines: [],
+				unusedLines: [],
+				summary: "Restricted Imports 0 lines",
+				status: 0,
+			},
+			{
+				name: "restricted import",
+				rules: [restricted],
+				importLines: restrictedReport,
+				unusedLines: [],
+				summary: "Restricted Imports 1 line",
+				status: 1,
+			},
+			{
+				name: "allowed import with an unused rule",
+				rules: [allowed, unused],
+				importLines: [],
+				unusedLines,
+				summary: "Restricted Imports 0 lines",
+				status: unusedStatus,
+			},
+			{
+				name: "restricted import with an unused rule",
+				rules: [restricted, unused],
+				importLines: restrictedReport,
+				unusedLines,
+				summary: "Restricted Imports 1 line",
+				status: 1,
+			},
+		])("$name", ({ rules, importLines, unusedLines, summary, status }) => {
+			const scope = { scope: "./src/*", rules, only: false };
+			const scopes = JSON.stringify([scope]);
+			const onlyScopes = JSON.stringify([{ ...scope, only: true }]);
+			const reportEnd = [...unusedLines, filesChecked, summary];
+			const report = [...importLines, ...reportEnd];
+			const reportWithUnscoped = [
+				...importLines,
+				"Unscoped Files (1)",
+				"./outside.ts",
+				...reportEnd,
+			];
+
+			test("omits the unscoped file list by default", () => {
+				const result = runCli(scopes, files, flags);
+				expectReport(result, status, report);
+			});
+
+			test("--unscoped lists the file outside the scope", () => {
+				const result = runCli(scopes, files, ["--unscoped", ...flags]);
+				expectReport(result, status, reportWithUnscoped);
+			});
+
+			test("only reports the selected scope and exits with a failure", () => {
+				const result = runCli(onlyScopes, files, flags);
+				expectReport(result, 1, [onlyStart, ...report, onlyEnd]);
+			});
+
+			test("only with --unscoped lists the file and still fails", () => {
+				const result = runCli(onlyScopes, files, ["--unscoped", ...flags]);
+				expectReport(result, 1, [onlyStart, ...reportWithUnscoped, onlyEnd]);
+			});
+		});
+	});
 });

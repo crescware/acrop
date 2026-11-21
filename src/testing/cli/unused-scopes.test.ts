@@ -7,25 +7,35 @@ describe("unused patterns in scopes with no checked files", () => {
 	beforeAll(buildCli);
 	afterAll(removeBuild);
 
-	test.each(["warn", "error"])("reports static patterns in %s mode", (mode) => {
+	describe("static patterns in an absent scope", () => {
 		const scopes = `[{ scope: "./absent/*", rules: [
 			{ allowed: ["./public"] }, { restricted: ["./private/**/*"] },
 			{ allowed: () => { throw Error("no importer"); } }, { sibling: true }
 		] }]`;
-		const result = runCli(scopes, {}, ["--unmatched-patterns", mode]);
-		expectReport(result, mode === "error" ? 1 : 0, [
+		const unusedPatterns = [
 			"Found 2 unused pattern(s) defined in rules:",
 			"./absent/* (2)",
 			"rules[0] ./public",
 			"rules[1] ./private/**/*",
-			...(mode === "error"
-				? [
-						'Failing build due to unused patterns and "unmatchedPatterns.shouldFail: true" setting.',
-					]
-				: []),
+		];
+		const summary = [
 			"Files Checked 0 files (0 found, 0 unscoped)",
 			"Restricted Imports 0 lines",
-		]);
+		];
+
+		test("warn reports unused patterns and exits successfully", () => {
+			const result = runCli(scopes, {}, ["--unmatched-patterns", "warn"]);
+			expectReport(result, 0, [...unusedPatterns, ...summary]);
+		});
+
+		test("error reports unused patterns and fails the build", () => {
+			const result = runCli(scopes, {}, ["--unmatched-patterns", "error"]);
+			expectReport(result, 1, [
+				...unusedPatterns,
+				'Failing build due to unused patterns and "unmatchedPatterns.shouldFail: true" setting.',
+				...summary,
+			]);
+		});
 	});
 
 	test("an earlier identical scope cannot consume a later scope's patterns", () => {

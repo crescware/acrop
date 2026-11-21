@@ -8,12 +8,10 @@ describe("CLI unused patterns in different scopes", () => {
 	afterAll(removeBuild);
 
 	function checkPatterns(secondName: string) {
-		const scopes = ["a", "b"].map((dir) => ({
-			scope: `./${dir}/*`,
-			rules: [
-				{ allowed: ["./lib"], name: dir === "a" ? "shared" : secondName },
-			],
-		}));
+		const scopes = [
+			{ scope: "./a/*", rules: [{ allowed: ["./lib"], name: "shared" }] },
+			{ scope: "./b/*", rules: [{ allowed: ["./lib"], name: secondName }] },
+		];
 		return runCli(
 			JSON.stringify(scopes),
 			{ "a/file.ts": "import '../lib/x';", "b/file.ts": "export {};" },
