@@ -37,7 +37,9 @@ export function createCliFixture() {
 	}
 
 	function removeBuild() {
-		if (buildDir) rmSync(buildDir, { recursive: true, force: true });
+		if (buildDir) {
+			rmSync(buildDir, { recursive: true, force: true });
+		}
 	}
 
 	function runCli(
@@ -75,7 +77,9 @@ export function createCliFixture() {
 					timeout: 10000,
 				},
 			);
-			if (result.error) throw result.error;
+			if (result.error) {
+				throw result.error;
+			}
 			const lines = stripVTControlCharacters(result.stdout)
 				.split(/\r?\n/)
 				.map((line) => line.trim().replace(/\s+/g, " "))
