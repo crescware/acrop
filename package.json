@@ -33,26 +33,26 @@
 		"vitest": "~3.0.9"
 	},
 	"engines": {
-		"node": ">=20.0.0",
-		"npm": ">=10.0.0"
+		"node": ">=22.0.0"
 	},
 	"files": ["dist", "src", "package.json", "README.md"],
 	"homepage": "https://github.com/crescware/acrop#readme",
 	"keywords": [],
 	"license": "MIT",
 	"main": "index.js",
+	"packageManager": "pnpm@12.21.0",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/crescware/acrop.git"
 	},
 	"scripts": {
-		"bench": "npm run build && tsx ./scripts/benchmark.mts",
-		"build": "npm run check && tsup ./index.ts --format esm && echo '#!/usr/bin/env node' | cat - dist/index.js > dist/index.mjs && chmod +x dist/index.mjs && rm dist/index.js",
-		"check": "npm run check:types && npm run check:lint && npm run test",
+		"bench": "pnpm run build && tsx ./scripts/benchmark.mts",
+		"build": "pnpm run check && tsup ./index.ts --format esm && echo '#!/usr/bin/env node' | cat - dist/index.js > dist/index.mjs && chmod +x dist/index.mjs && rm dist/index.js",
+		"check": "pnpm run check:types && pnpm run check:lint && pnpm run test",
 		"check:lint": "biome lint",
 		"check:types": "tsc -p ./tsconfig.json --noEmit",
 		"start": "tsx ./index.ts",
-		"test": "npm run test:watch -- --run",
+		"test": "vitest run",
 		"test:watch": "vitest"
 	},
 	"type": "module"

@@ -1,0 +1,3 @@
+allowBuilds:
+  '@biomejs/biome@1.9.4': true
+  'esbuild@0.25.1': true
