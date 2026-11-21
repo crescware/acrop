@@ -22,7 +22,9 @@ export async function importConfig(
 
 	const end2 = logger.start("> Transform config file");
 	const result = transformFileSync(path, {
-		presets: [createRequire(import.meta.url).resolve("@babel/preset-typescript")],
+		presets: [
+			createRequire(import.meta.url).resolve("@babel/preset-typescript"),
+		],
 		filename: path,
 		sourceMaps: false,
 	});

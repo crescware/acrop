@@ -33,9 +33,6 @@ export function handleUnmatchedPatterns(
 			return { needsCheck: true, shouldFail: true };
 
 		default:
-			throw new Error(
-				// biome-ignore lint/suspicious/noExplicitAny:
-				`Internal error: Unexpected severity value: ${v as any}`,
-			);
+			throw new Error(`Internal error: Unexpected severity value: ${v}`);
 	}
 }

@@ -48,8 +48,7 @@ describe("main() – syntax error file present", () => {
 							attributes: [{ type: "color", value: "red" }],
 						},
 					],
-					// biome-ignore lint/suspicious/noExplicitAny:
-					children: expect.any(Array) as any,
+					children: expect.any(Array),
 				},
 				{
 					type: "table",

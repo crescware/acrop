@@ -10,8 +10,8 @@ export function analyzeImportAccess(
 	trackerRef: UnmatchedPatternsTracker,
 ): readonly AnalyzedResult[] {
 	const end = logger.start("> > Analyze import access");
-	const ret = infoArray.map(
-		(v): AnalyzedResult => analyze(rules, v, trackerRef),
+	const ret = infoArray.map((v): AnalyzedResult =>
+		analyze(rules, v, trackerRef),
 	);
 	end();
 	return ret;
