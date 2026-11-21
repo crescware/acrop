@@ -45,17 +45,22 @@ export function createCliFixture() {
 		files: Record<string, string>,
 		flags: string[] = [],
 	): CliResult {
+		const config = "acrop.config.ts";
+		const fixture = { ...files };
+		if (scopes !== undefined) {
+			fixture[config] = `export default { root: ".", scopes: ${scopes} };`;
+		}
+		return runWithArgs(fixture, [join("project", config), ...flags]);
+	}
+
+	function runWithArgs(
+		files: Record<string, string>,
+		args: string[],
+	): CliResult {
 		const cwd = mkdtempSync(join(realpathSync(tmpdir()), "acrop-cli-test-"));
 		const project = join(cwd, "project");
-		const config = "acrop.config.ts";
 		try {
-			const fixture: Record<string, string> = {
-				".gitignore": config,
-				...files,
-			};
-			if (scopes !== undefined) {
-				fixture[config] = `export default { root: ".", scopes: ${scopes} };`;
-			}
+			const fixture = { ".gitignore": "acrop.config.ts", ...files };
 			for (const [name, content] of Object.entries(fixture)) {
 				const path = join(project, name);
 				mkdirSync(dirname(path), { recursive: true });
@@ -63,7 +68,7 @@ export function createCliFixture() {
 			}
 			const result = spawnSync(
 				process.execPath,
-				[join(buildDir, "index.mjs"), join("project", config), ...flags],
+				[join(buildDir, "index.mjs"), ...args],
 				{
 					cwd,
 					encoding: "utf8",
@@ -81,7 +86,7 @@ export function createCliFixture() {
 		}
 	}
 
-	return { buildCli, removeBuild, runCli };
+	return { buildCli, removeBuild, runCli, runWithArgs };
 }
 
 export function expectReport(

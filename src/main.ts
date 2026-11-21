@@ -1,4 +1,4 @@
-import { dirname } from "node:path";
+import { dirname, resolve } from "node:path";
 
 import { calcConfigAbsolutePath } from "./calc-config-absolute-path";
 import { check } from "./check/check";
@@ -8,7 +8,6 @@ import { importConfig } from "./import-config";
 import { outputFromTree } from "./log-reports";
 import { buildTree } from "./log-tree";
 import { ownedTimeSpan } from "./owned-time-span";
-import { UnmatchedPatternsTracker } from "./unmatched-pattern-tracker";
 import { VerboseLogger } from "./verbose-logger";
 
 export async function main(): Promise<boolean> {
@@ -17,8 +16,8 @@ export async function main(): Promise<boolean> {
 	const cliConfig = extractCliConfig();
 	const logger = new VerboseLogger(cliConfig.verbose);
 	const configPath = calcConfigAbsolutePath(logger, cliConfig.configPath);
-	const root = dirname(configPath);
 	const config = await importConfig(logger, configPath);
+	const root = resolve(dirname(configPath), config.root);
 	const tsFiles = getAllTsFiles(logger, root);
 
 	const onlyScopes = config.scopes.filter((scope) => scope.only);
@@ -32,17 +31,12 @@ export async function main(): Promise<boolean> {
 		console.info(""); // blank
 	}
 
-	const tracker = new UnmatchedPatternsTracker();
-
-	const { scoped, errorsRef, reports } = check(
+	const { scoped, errorsRef, reports, unmatchedPatterns } = check(
 		logger,
 		scopeDeclarations,
 		tsFiles,
 		root,
-		tracker,
 	);
-
-	const unmatchedPatterns = tracker.getUnmatchedPatterns();
 
 	const duration = end();
 

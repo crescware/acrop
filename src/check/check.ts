@@ -2,7 +2,10 @@ import { minimatch } from "minimatch";
 
 import type { importConfig } from "../import-config";
 import type { Report } from "../log-tree";
-import type { UnmatchedPatternsTracker } from "../unmatched-pattern-tracker";
+import {
+	type PatternInfo,
+	UnmatchedPatternsTracker,
+} from "../unmatched-pattern-tracker";
 import type { VerboseLogger } from "../verbose-logger";
 import { checkScope } from "./check-scope";
 import type { ErrorReport } from "./error-report";
@@ -11,6 +14,7 @@ type Return = Readonly<{
 	scoped: Set<string>;
 	errorsRef: readonly ErrorReport[];
 	reports: readonly Report[];
+	unmatchedPatterns: readonly PatternInfo[];
 }>;
 
 export function check(
@@ -18,7 +22,6 @@ export function check(
 	scopes: Awaited<ReturnType<typeof importConfig>>["scopes"],
 	tsFiles: readonly { relative: string; absolute: string }[],
 	root: string,
-	trackerRef: UnmatchedPatternsTracker,
 ): Return {
 	const end1 = logger.startWithHeader("Check files");
 
@@ -26,6 +29,7 @@ export function check(
 	const errorsRef = [] as ErrorReport[];
 	const reports = [] as Report[];
 
+	const unmatchedPatterns: PatternInfo[] = [];
 	const remaining = new Set(tsFiles);
 	for (const declaration of scopes) {
 		const end2 = logger.start(`> "${declaration.scope}" Matched file in scope`);
@@ -40,6 +44,7 @@ export function check(
 		}
 		end2();
 
+		const tracker = new UnmatchedPatternsTracker(declaration);
 		checkScope(
 			logger,
 			declaration,
@@ -48,11 +53,19 @@ export function check(
 			scoped,
 			errorsRef,
 			reports,
-			trackerRef,
+			tracker,
 		);
+		for (const pattern of tracker.getUnmatchedPatterns()) {
+			unmatchedPatterns.push(pattern);
+		}
 	}
 
-	const ret = { scoped, errorsRef, reports } satisfies Return;
+	const ret = {
+		scoped,
+		errorsRef,
+		reports,
+		unmatchedPatterns,
+	} satisfies Return;
 	end1();
 	return ret;
 }

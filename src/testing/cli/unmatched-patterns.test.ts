@@ -39,4 +39,23 @@ describe("CLI unused patterns in different scopes", () => {
 	test("keeps the unused pattern when both rules have the same name", () => {
 		expectUnusedInSecondScope(checkPatterns("shared"));
 	});
+
+	test("reports generated and static unused patterns in rule order", () => {
+		const result = runCli(
+			`[{scope:"./src/*", rules: [
+			{restricted: (file: string) => [file.replace(".ts", ".internal")]},
+			{allowed: ["./used", "./unused"]},
+		]}]`,
+			{ "src/a.ts": "import '../used/x';" },
+			["--unmatched-patterns", "warn"],
+		);
+		expectReport(result, 0, [
+			"Found 2 unused pattern(s) defined in rules:",
+			"./src/* (2)",
+			"rules[0] ./src/a.internal",
+			"rules[1] ./unused",
+			"Files Checked 1 file (1 found, 0 unscoped)",
+			"Restricted Imports 0 lines",
+		]);
+	});
 });
