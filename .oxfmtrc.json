@@ -6,6 +6,8 @@
 		"newlinesBetween": false,
 		"partitionByNewline": true
 	},
-	"sortPackageJson": false,
+	"sortPackageJson": {
+		"sortScripts": true
+	},
 	"ignorePatterns": ["/.next/", "/dist/", "/coverage/", "/pnpm-lock.yaml"]
 }
