@@ -33,7 +33,7 @@
 		"vitest": "~3.0.9"
 	},
 	"engines": {
-		"node": ">=20.0.0"
+		"node": ">=26.0.0"
 	},
 	"files": ["dist", "src", "package.json", "README.md"],
 	"homepage": "https://github.com/crescware/acrop#readme",
