@@ -1,4 +1,5 @@
 import { existsSync, unlinkSync, writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { transformFileSync } from "@babel/core";
@@ -21,7 +22,7 @@ export async function importConfig(
 
 	const end2 = logger.start("> Transform config file");
 	const result = transformFileSync(path, {
-		presets: ["@babel/preset-typescript"],
+		presets: [createRequire(import.meta.url).resolve("@babel/preset-typescript")],
 		filename: path,
 		sourceMaps: false,
 	});
