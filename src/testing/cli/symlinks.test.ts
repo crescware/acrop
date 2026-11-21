@@ -46,4 +46,44 @@ describe("CLI symbolic links", () => {
 			"Restricted Imports 1 line",
 		]);
 	});
+
+	test("does not descend through a link into a directory being searched", () => {
+		const result = runCli(
+			"[]",
+			{
+				"d/a.ts": "",
+				"d/up": { symlink: ".." },
+				self: { symlink: "." },
+			},
+			["--unscoped"],
+		);
+		expectReport(result, 0, [
+			"Unscoped Files (1)",
+			"./d/a.ts",
+			"Files Checked 0 files (1 found, 1 unscoped)",
+			"Restricted Imports 0 lines",
+		]);
+	});
+
+	test("follows links between sibling directories until they lead back", () => {
+		const result = runCli(
+			"[]",
+			{
+				"a/x.ts": "",
+				"a/to-b": { symlink: "../b" },
+				"b/y.ts": "",
+				"b/to-a": { symlink: "../a" },
+			},
+			["--unscoped"],
+		);
+		expectReport(result, 0, [
+			"Unscoped Files (4)",
+			"./a/to-b/y.ts",
+			"./a/x.ts",
+			"./b/to-a/x.ts",
+			"./b/y.ts",
+			"Files Checked 0 files (4 found, 4 unscoped)",
+			"Restricted Imports 0 lines",
+		]);
+	});
 });
