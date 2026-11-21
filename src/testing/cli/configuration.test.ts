@@ -4,7 +4,7 @@ import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { createCliFixture, expectReport } from "./cli-fixture";
 
 describe("CLI configuration and file discovery", () => {
-	const { buildCli, removeBuild, runCli } = createCliFixture();
+	const { buildCli, removeBuild, runCli, runWithArgs } = createCliFixture();
 	beforeAll(buildCli);
 	afterAll(removeBuild);
 
@@ -22,7 +22,7 @@ describe("CLI configuration and file discovery", () => {
 	});
 
 	test("reports the requested path when the config file is missing", () => {
-		const result = runCli(undefined, {});
+		const result = runWithArgs({}, [join("project", "acrop.config.ts")]);
 		expect(result.status).toBe(1);
 		expect(result.stderr).toContain(
 			`Configuration file not found at: ${join(result.project, "acrop.config.ts")}`,
