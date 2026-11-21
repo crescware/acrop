@@ -3,16 +3,18 @@ import { dirname, relative } from "node:path";
 import { assertExists, exists } from "../exists";
 import type { importConfig } from "../import-config";
 import { expandPatterns } from "../pattern/expand-patterns";
-import type { UnmatchedPatternsTracker } from "../unmatched-pattern-tracker";
+import type {
+	PatternInfo,
+	UnmatchedPatternsTracker,
+} from "../unmatched-pattern-tracker";
 
 type Declaration = Awaited<ReturnType<typeof importConfig>>["scopes"][number];
 
-export type Rule = Readonly<{
-	type: "allowed" | "restricted";
-	pattern: string;
-	scopeLabel: string;
-	ruleIndex: number;
-}>;
+export type Rule = PatternInfo &
+	Readonly<{
+		type: "allowed" | "restricted";
+		scopeLabel: string;
+	}>;
 
 function createScopeLabel(
 	scopeName: string,
@@ -54,11 +56,12 @@ function processSiblingRule(
 		const rule = {
 			type: ruleType,
 			pattern,
+			scopeName,
 			scopeLabel,
 			ruleIndex,
 		} as const satisfies Rule;
 
-		trackerRef.addPattern({ scopeName, scopeLabel, ruleIndex, pattern });
+		trackerRef.addPattern(rule);
 		rules.push(rule);
 	}
 
@@ -97,11 +100,12 @@ function processAllowedRule(
 		const rule = {
 			type: "allowed",
 			pattern,
+			scopeName,
 			scopeLabel,
 			ruleIndex,
 		} as const satisfies Rule;
 
-		trackerRef.addPattern({ scopeName, scopeLabel, ruleIndex, pattern });
+		trackerRef.addPattern(rule);
 		rules.push(rule);
 	}
 
@@ -140,11 +144,12 @@ function processRestrictedRule(
 		const rule = {
 			type: "restricted",
 			pattern,
+			scopeName,
 			scopeLabel,
 			ruleIndex,
 		} as const satisfies Rule;
 
-		trackerRef.addPattern({ scopeName, scopeLabel, ruleIndex, pattern });
+		trackerRef.addPattern(rule);
 		rules.push(rule);
 	}
 
