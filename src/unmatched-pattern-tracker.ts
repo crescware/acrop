@@ -15,7 +15,9 @@ export class UnmatchedPatternsTracker {
 		declaration: Awaited<ReturnType<typeof importConfig>>["scopes"][number],
 	) {
 		for (const [ruleIndex, rule] of declaration.rules.entries()) {
-			if ("sibling" in rule) continue;
+			if ("sibling" in rule) {
+				continue;
+			}
 			const patterns = "allowed" in rule ? rule.allowed : rule.restricted;
 			if (Array.isArray(patterns)) {
 				for (const pattern of patterns) {

@@ -3,6 +3,8 @@
 	"categories": { "correctness": "error" },
 	"ignorePatterns": ["/.next/", "/dist/", "/coverage/"],
 	"rules": {
-		"eslint/no-console": ["error", { "allow": ["error", "info"] }]
+		"eslint/curly": ["error", "all"],
+		"eslint/no-console": ["error", { "allow": ["error", "info"] }],
+		"eslint/no-empty": ["error", { "allowEmptyCatch": true }]
 	}
 }

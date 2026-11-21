@@ -106,7 +106,9 @@ function processAllowedRule(
 			ruleIndex,
 		} as const satisfies Rule;
 
-		if (generated) trackerRef.addPattern(rule);
+		if (generated) {
+			trackerRef.addPattern(rule);
+		}
 		rules.push(rule);
 	}
 
@@ -151,7 +153,9 @@ function processRestrictedRule(
 			ruleIndex,
 		} as const satisfies Rule;
 
-		if (generated) trackerRef.addPattern(rule);
+		if (generated) {
+			trackerRef.addPattern(rule);
+		}
 		rules.push(rule);
 	}
 
