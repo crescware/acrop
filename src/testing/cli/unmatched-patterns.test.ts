@@ -36,8 +36,7 @@ describe("CLI unused patterns in different scopes", () => {
 		expectUnusedInSecondScope(checkPatterns("other"));
 	});
 
-	// Known defect: identical rule names currently share their matched state across scopes.
-	test.fails("keeps the unused pattern when both rules have the same name", () => {
+	test("keeps the unused pattern when both rules have the same name", () => {
 		expectUnusedInSecondScope(checkPatterns("shared"));
 	});
 });
