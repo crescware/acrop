@@ -76,16 +76,16 @@ The report shows the importing file, its violation count, the line and column of
 
 ## How configuration works
 
-The configuration must default-export an object with `root: "."` and an ordered `scopes` array. acrop scans from the directory containing the configuration file and reads the `.gitignore` in that directory.
+The configuration must default-export an object with a scan directory (`root`) and an ordered `scopes` array. A relative `root` resolves from the directory containing the configuration file. For example, `"./src"` scans the `src/` subdirectory. acrop reads `.gitignore` from the scan directory.
 
-- `scope` is a glob that matches source files relative to the configuration directory. Start scope and target globs with `./`.
+- `scope` is a glob that matches source files relative to the scan directory. Start scope and target globs with `./`.
 - The first matching scope applies to each file. Within that scope, the first matching rule decides each import. Imports in scope that match no rule are restricted. Files outside all scopes are skipped.
-- `allowed` and `restricted` accept arrays of target globs. They also accept functions that take the importing file's path relative to the configuration directory, prefixed with `./`, and return an array of globs. A directory pattern such as `./src/ui` also matches paths below it.
+- `allowed` and `restricted` accept arrays of target globs. They also accept functions that take the importing file's path relative to the scan directory, prefixed with `./`, and return an array of globs. A directory pattern such as `./src/ui` also matches paths below it.
 - `sibling: true` allows targets in the importing file's directory and its subdirectories. `sibling: false` restricts those targets.
 - `name` gives a rule a label in reports.
 - `only: true` runs only the scopes marked for debugging and exits with status `1`.
 
-acrop checks static `import` declarations in `.ts` and `.tsx` files. It interprets the import string as a filesystem path relative to the importing file, even for package names or TypeScript aliases. The rules match the resulting path relative to the configuration directory. For example, `../ui/button` from `src/domain/order.ts` matches `./src/ui/button`.
+acrop checks static `import` declarations in `.ts` and `.tsx` files. It interprets the import string as a filesystem path relative to the importing file, even for package names or TypeScript aliases. The rules match the resulting path relative to the scan directory. For example, `../ui/button` from `src/domain/order.ts` matches `./src/ui/button`.
 
 ## CLI options and exit codes
 
@@ -94,6 +94,8 @@ acrop checks static `import` declarations in `.ts` and `.tsx` files. It interpre
 | `--unscoped`                  | List files that acrop did not check.                                                                                                                                    |
 | `--verbose`                   | Show diagnostic logs and timings.                                                                                                                                       |
 | `--unmatched-patterns <mode>` | Choose how to handle rule patterns that never matched an import. `off` (default) skips the report, `warn` reports the patterns, and `error` also exits with status `1`. |
+
+A static rule pattern can be unused even when its scope matches no files. Function rules contribute the patterns they return for checked files.
 
 Use `--unscoped` to review which files your scopes leave out and `--unmatched-patterns warn` to find unused patterns when introducing acrop.
 

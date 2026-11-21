@@ -93,6 +93,7 @@ function processAllowedRule(
 
 	const ruleName = getRuleName(rule);
 	const scopeLabel = createScopeLabel(scopeName, ruleIndex, ruleName);
+	const generated = typeof rule.allowed === "function";
 	const expandedPatterns = expandPatterns(paths);
 
 	const rules: Rule[] = [];
@@ -105,7 +106,7 @@ function processAllowedRule(
 			ruleIndex,
 		} as const satisfies Rule;
 
-		trackerRef.addPattern(rule);
+		if (generated) trackerRef.addPattern(rule);
 		rules.push(rule);
 	}
 
@@ -137,6 +138,7 @@ function processRestrictedRule(
 
 	const ruleName = getRuleName(rule);
 	const scopeLabel = createScopeLabel(scopeName, ruleIndex, ruleName);
+	const generated = typeof rule.restricted === "function";
 	const expandedPatterns = expandPatterns(paths);
 
 	const rules: Rule[] = [];
@@ -149,7 +151,7 @@ function processRestrictedRule(
 			ruleIndex,
 		} as const satisfies Rule;
 
-		trackerRef.addPattern(rule);
+		if (generated) trackerRef.addPattern(rule);
 		rules.push(rule);
 	}
 
