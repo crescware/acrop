@@ -28,7 +28,6 @@
 		"@types/node": "~20.17.27",
 		"ts-essentials": "~10.0.4",
 		"tsup": "8.4.0",
-		"tsx": "~4.19.3",
 		"typescript": "7.0.2",
 		"vitest": "~3.0.9"
 	},
@@ -46,12 +45,13 @@
 		"url": "git+https://github.com/crescware/acrop.git"
 	},
 	"scripts": {
-		"bench": "pnpm run build && tsx ./scripts/benchmark.mts",
-		"build": "pnpm run check && tsup ./index.ts --format esm && echo '#!/usr/bin/env node' | cat - dist/index.js > dist/index.mjs && chmod +x dist/index.mjs && rm dist/index.js",
+		"bench": "pnpm run build && node ./scripts/benchmark.mts",
+		"build": "pnpm run check && pnpm run build:cli",
+		"build:cli": "tsup ./index.ts --format esm && echo '#!/usr/bin/env node' | cat - dist/index.js > dist/index.mjs && chmod +x dist/index.mjs && rm dist/index.js",
 		"check": "pnpm run check:types && pnpm run check:lint && pnpm run test",
 		"check:lint": "biome lint",
 		"check:types": "tsc -p ./tsconfig.json --noEmit",
-		"start": "tsx ./index.ts",
+		"start": "pnpm run build:cli && node ./dist/index.mjs",
 		"test": "vitest run",
 		"test:watch": "vitest"
 	},
