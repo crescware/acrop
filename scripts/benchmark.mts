@@ -69,9 +69,11 @@ try {
 		console.info(`Run ${run}/${runs}: ${elapsed.toFixed(1)} ms`);
 	}
 	timings.sort((a, b) => a - b);
-	console.info(
-		`Median: ${timings[Math.floor(timings.length / 2)].toFixed(1)} ms`,
-	);
+	const median = timings[Math.floor(timings.length / 2)];
+	if (median === undefined) {
+		throw new Error("No timed benchmark runs completed.");
+	}
+	console.info(`Median: ${median.toFixed(1)} ms`);
 } finally {
 	rmSync(temporary, { recursive: true, force: true });
 }
