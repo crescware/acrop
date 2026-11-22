@@ -51,6 +51,35 @@ describe("CLI input errors", () => {
 				'export default { root: ".", scopes: [{scope:"./*", rules:[{sibling:"yes"}]}] }',
 			field: "default.scopes.0.rules.0",
 		},
+		{
+			config: 'export default { root: ".", scopes: [{scope:"./*"}] }',
+			field: "default.scopes.0.rules",
+		},
+		{
+			config:
+				'export default { root: ".", scopes: [{scope:"./*", rules:[], typo: true}] }',
+			field: "default.scopes.0.typo",
+		},
+		{
+			config:
+				'export default { root: ".", scopes: [{scope:"./*", rules:[], only: "true"}] }',
+			field: "default.scopes.0.only",
+		},
+		{
+			config:
+				'export default { root: ".", scopes: [{scope:"./*", rules:[{allowed:[""]}]}] }',
+			field: "default.scopes.0.rules.0.allowed.0",
+		},
+		{
+			config:
+				'export default { root: ".", scopes: [{scope:"./*", rules:[{restricted:[], name: 1}]}] }',
+			field: "default.scopes.0.rules.0",
+		},
+		{
+			config:
+				'export default { root: ".", scopes: [{scope:"./*", rules:[{}]}] }',
+			field: "default.scopes.0.rules.0",
+		},
 	])("identifies the invalid field in $config", ({ config, field }) => {
 		const result = runWithArgs({ "acrop.config.ts": config }, [
 			"project/acrop.config.ts",
@@ -68,6 +97,28 @@ describe("CLI input errors", () => {
 		expect(result.status).toBe(1);
 		expect(result.stderr).toMatch(/acrop\.config\.ts/);
 		expect(result.stderr).toMatch(/Unexpected token/);
+		expect(result.lines).toEqual(["Exiting with code 1"]);
+	});
+
+	test("reports an error thrown by a rule function without printing a report", () => {
+		const result = runWithArgs(
+			{
+				"acrop.config.ts": `export default { root: ".", scopes: [{ scope: "./*", rules: [
+				{ allowed: () => { throw new Error("rule function failed"); } }
+			] }] };`,
+				"a.ts": "",
+			},
+			["project/acrop.config.ts"],
+		);
+		expect(result.status).toBe(1);
+		expect(result.stderr).toContain("rule function failed");
+		expect(result.lines).toEqual(["Exiting with code 1"]);
+	});
+
+	test("reports a directory given as the config path", () => {
+		const result = runWithArgs({ "a.ts": "" }, ["project"]);
+		expect(result.status).toBe(1);
+		expect(result.stderr).toMatch(/EISDIR/);
 		expect(result.lines).toEqual(["Exiting with code 1"]);
 	});
 });

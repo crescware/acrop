@@ -56,4 +56,39 @@ describe("CLI unused patterns in different scopes", () => {
 			"Restricted Imports 0 lines",
 		]);
 	});
+
+	test("reports a pattern that an earlier rule shadows", () => {
+		const result = runCli(
+			'[{scope:"./src/*", rules: [{restricted: ["./ui"]}, {allowed: ["./ui"]}]}]',
+			{ "src/a.ts": "import '../ui/x';" },
+			["--unmatched-patterns", "warn"],
+		);
+		expectReport(result, 1, [
+			"./src/a.ts (1)",
+			"1:8 ./ui/x ./src/*:rule[0]",
+			"Found 1 unused pattern(s) defined in rules:",
+			"./src/* (1)",
+			"rules[1] ./ui",
+			"Files Checked 1 file (1 found, 0 unscoped)",
+			"Restricted Imports 1 line",
+		]);
+	});
+
+	test("reports the sibling pattern of each directory without a sibling import", () => {
+		const result = runCli(
+			'[{scope:"./src/**/*", rules: [{sibling: true}, {allowed: ["./lib"]}]}]',
+			{
+				"src/x/a.ts": "import './b';",
+				"src/y/a.ts": "import '../../lib';",
+			},
+			["--unmatched-patterns", "warn"],
+		);
+		expectReport(result, 0, [
+			"Found 1 unused pattern(s) defined in rules:",
+			"./src/**/* (1)",
+			"rules[0] ./src/y/**/*",
+			"Files Checked 2 files (2 found, 0 unscoped)",
+			"Restricted Imports 0 lines",
+		]);
+	});
 });

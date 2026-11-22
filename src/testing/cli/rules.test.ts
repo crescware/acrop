@@ -103,4 +103,42 @@ describe("CLI scope and rule selection", () => {
 			]);
 		});
 	});
+
+	test("labels a violation of an unnamed rule with its scope and index", () => {
+		const scopes = JSON.stringify([
+			{
+				scope: "./src/*",
+				rules: [{ allowed: ["./lib"] }, { restricted: ["./ui"] }],
+			},
+		]);
+		const result = runCli(scopes, { "src/a.ts": "import '../ui/x';" });
+		expectReport(result, 1, [
+			"./src/a.ts (1)",
+			"1:8 ./ui/x ./src/*:rule[1]",
+			"Files Checked 1 file (1 found, 0 unscoped)",
+			"Restricted Imports 1 line",
+		]);
+	});
+
+	test("reports files in scope order, then in traversal order", () => {
+		const scopes = JSON.stringify([
+			{ scope: "./z/*", rules: [] },
+			{ scope: "./a/*", rules: [] },
+		]);
+		const result = runCli(scopes, {
+			"a/1.ts": "import './x';",
+			"z/2.ts": "import './x';",
+			"z/1.ts": "import './x';",
+		});
+		expectReport(result, 1, [
+			"./z/1.ts (1)",
+			"1:8 ./z/x ./z/*",
+			"./z/2.ts (1)",
+			"1:8 ./z/x ./z/*",
+			"./a/1.ts (1)",
+			"1:8 ./a/x ./a/*",
+			"Files Checked 3 files (3 found, 0 unscoped)",
+			"Restricted Imports 3 lines",
+		]);
+	});
 });

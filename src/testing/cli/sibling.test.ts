@@ -47,4 +47,13 @@ describe("CLI sibling boundaries", () => {
 			"Restricted Imports 2 lines",
 		]);
 	});
+
+	test("sibling matches the importer's own directory", () => {
+		const result = runCli(
+			JSON.stringify([{ scope: "./src/team/*", rules: [{ sibling: true }] }]),
+			{ "src/team/a.ts": "import '.';" },
+			flags,
+		);
+		expectReport(result, 0, [filesChecked, "Restricted Imports 0 lines"]);
+	});
 });
