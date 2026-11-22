@@ -8,14 +8,14 @@ acrop は TypeScript プロジェクトの import をルールに沿って検査
 
 ### インストール
 
-Node.js 22 以上を使い、検査対象のプロジェクトでお使いのパッケージマネージャーに対応するコマンドを実行します。GitHub のリリースアーカイブにはビルド済みの CLI が含まれています。 [リリース v0.0.14](https://github.com/crescware/acrop/releases/tag/v0.0.14)
+Node.js 22 以上を使い、検査対象のプロジェクトでお使いのパッケージマネージャーに対応するコマンドを実行します。 [npm の acrop](https://www.npmjs.com/package/acrop)
 
 ```sh
 # npm
-npm install --save-dev https://github.com/crescware/acrop/archive/refs/tags/v0.0.14.tar.gz
+npm install --save-dev acrop
 
 # pnpm
-pnpm add --save-dev https://github.com/crescware/acrop/archive/refs/tags/v0.0.14.tar.gz
+pnpm add --save-dev acrop
 ```
 
 ### import の制約を設定する
@@ -137,9 +137,10 @@ mise exec -- pnpm build
 mise exec -- node dist/index.mjs /path/to/project/acrop.config.ts
 ```
 
-| コマンド                   | 動作                                                                             |
-| -------------------------- | -------------------------------------------------------------------------------- |
-| `mise exec -- pnpm check`  | TypeScript の型チェック、oxlint、oxfmt のフォーマット検査、Vitest を実行します。 |
-| `mise exec -- pnpm format` | oxfmt で整形し、`package.json` と `scripts` のキーも並べ替えます。               |
-| `mise exec -- pnpm test`   | Vitest のテストを実行します。                                                    |
-| `mise exec -- pnpm build`  | 検証を実行して CLI をビルドします。                                              |
+| コマンド                    | 動作                                                                             |
+| --------------------------- | -------------------------------------------------------------------------------- |
+| `mise exec -- pnpm check`   | TypeScript の型チェック、oxlint、oxfmt のフォーマット検査、Vitest を実行します。 |
+| `mise exec -- pnpm format`  | oxfmt で整形し、`package.json` と `scripts` のキーも並べ替えます。               |
+| `mise exec -- pnpm test`    | Vitest のテストを実行します。                                                    |
+| `mise exec -- pnpm build`   | 検証を実行して CLI をビルドします。                                              |
+| `mise exec -- pnpm publish` | 検証とビルドを実行して、パッケージを npm に公開します。                          |
