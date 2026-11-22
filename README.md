@@ -8,14 +8,14 @@ acrop checks import boundaries in TypeScript projects. Use it to keep domain cod
 
 ### Install acrop
 
-With Node.js 22 or later, run the command for your package manager in the project you want to check. It installs the latest release, whose tag includes the built CLI. [Latest release](https://github.com/crescware/acrop/releases/latest)
+With Node.js 22 or later, run the command for your package manager in the project you want to check. [acrop on npm](https://www.npmjs.com/package/acrop)
 
 ```sh
 # npm
-npm install --save-dev "github:crescware/acrop#semver:*"
+npm install --save-dev acrop
 
 # pnpm
-pnpm add --save-dev "github:crescware/acrop#semver:*"
+pnpm add --save-dev acrop
 ```
 
 ### Define an import boundary
@@ -137,9 +137,10 @@ The build produces `dist/index.mjs`. Pass the path to a project's configuration 
 mise exec -- node dist/index.mjs /path/to/project/acrop.config.ts
 ```
 
-| Command                    | What it does                                                                      |
-| -------------------------- | --------------------------------------------------------------------------------- |
-| `mise exec -- pnpm check`  | Run TypeScript, oxlint, the oxfmt check, and the Vitest suite.                    |
-| `mise exec -- pnpm format` | Format files with oxfmt, including sorting `package.json` and its `scripts` keys. |
-| `mise exec -- pnpm test`   | Run the Vitest suite.                                                             |
-| `mise exec -- pnpm build`  | Run the checks and build the CLI.                                                 |
+| Command                     | What it does                                                                      |
+| --------------------------- | --------------------------------------------------------------------------------- |
+| `mise exec -- pnpm check`   | Run TypeScript, oxlint, the oxfmt check, and the Vitest suite.                    |
+| `mise exec -- pnpm format`  | Format files with oxfmt, including sorting `package.json` and its `scripts` keys. |
+| `mise exec -- pnpm test`    | Run the Vitest suite.                                                             |
+| `mise exec -- pnpm build`   | Run the checks and build the CLI.                                                 |
+| `mise exec -- pnpm publish` | Run the checks, build the CLI, and publish the package to npm.                    |

@@ -33,6 +33,7 @@
 		"check:lint": "oxlint",
 		"check:types": "tsc -p ./tsconfig.json --noEmit",
 		"format": "oxfmt --write",
+		"prepack": "pnpm run build",
 		"start": "pnpm run build:cli && node ./dist/index.mjs",
 		"test": "vitest run",
 		"test:watch": "vitest"
