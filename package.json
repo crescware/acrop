@@ -1,6 +1,6 @@
 {
 	"name": "acrop",
-	"version": "0.0.14",
+	"version": "0.0.15",
 	"description": "A CLI that checks import boundaries in TypeScript projects.",
 	"keywords": [
 		"architecture",
