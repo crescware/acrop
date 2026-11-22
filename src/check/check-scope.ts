@@ -8,6 +8,7 @@ import { analyzeImportAccess } from "./analyze-import-access";
 import { calcRules } from "./calc-rules";
 import type { ErrorReport } from "./error-report";
 import { findImportPaths } from "./find-import-paths";
+import { makeLocator } from "./make-locator";
 import { parseImports } from "./parse-imports";
 
 export function checkScope(
@@ -30,26 +31,28 @@ export function checkScope(
 		}
 		end3();
 
-		const { imports, positions } = parsed;
+		const { imports, code } = parsed;
 		const rules = calcRules(root, path.absolute, declaration, trackerRef);
 
 		const end4 = logger.start(`> > "${path.relative}" Find import paths`);
-		const infoArray = findImportPaths(imports, positions).map(
+		const infoArray = findImportPaths(imports).map(
 			(v): ReturnType<typeof findImportPaths>[number] => {
 				const relativePath = `./${relative(
 					root,
 					resolve(dirname(path.absolute), v.path.relative),
 				)}`;
-				return {
-					path: { relative: relativePath },
-					line: v.line,
-					column: v.column,
-				};
+				return { path: { relative: relativePath }, start: v.start };
 			},
 		);
 		end4();
 
-		const analyzed = analyzeImportAccess(logger, rules, infoArray, trackerRef);
+		const analyzed = analyzeImportAccess(
+			logger,
+			rules,
+			infoArray,
+			trackerRef,
+			makeLocator(code),
+		);
 
 		reports.push({ path, result: analyzed });
 		scoped.add(path.absolute);
