@@ -1,6 +1,6 @@
 import type { importConfig } from "../import-config";
 import type { Report } from "../log-tree";
-import { matchesPattern } from "../pattern/matches-pattern";
+import { compilePattern } from "../pattern/matches-pattern";
 import {
 	type PatternInfo,
 	UnmatchedPatternsTracker,
@@ -33,9 +33,10 @@ export function check(
 	for (const declaration of scopes) {
 		const end2 = logger.start(`> "${declaration.scope}" Matched file in scope`);
 		const matchedFiles: (typeof tsFiles)[number][] = [];
+		const matchesScope = compilePattern(declaration.scope);
 		for (const file of remaining) {
 			const end3 = logger.start(`> > "${file.relative}" Match file`);
-			if (matchesPattern(file.relative, declaration.scope)) {
+			if (matchesScope(file.relative)) {
 				matchedFiles.push(file);
 				remaining.delete(file);
 			}
