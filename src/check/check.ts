@@ -16,12 +16,12 @@ type Return = Readonly<{
 	unmatchedPatterns: readonly PatternInfo[];
 }>;
 
-export function check(
+export async function check(
 	logger: VerboseLogger,
 	scopes: Awaited<ReturnType<typeof importConfig>>["scopes"],
 	tsFiles: readonly { relative: string; absolute: string }[],
 	root: string,
-): Return {
+): Promise<Return> {
 	const end1 = logger.startWithHeader("Check files");
 
 	const scoped = new Set<string>();
@@ -45,7 +45,7 @@ export function check(
 		end2();
 
 		const tracker = new UnmatchedPatternsTracker(declaration);
-		checkScope(
+		await checkScope(
 			logger,
 			declaration,
 			matchedFiles,

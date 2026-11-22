@@ -1,6 +1,4 @@
-import type { parseImports } from "./parse-imports";
-
-type Parsed = NonNullable<ReturnType<typeof parseImports>>;
+import type { ParsedImports } from "./parse-imports";
 
 type ImportInfo = Readonly<{
 	path: Readonly<{
@@ -11,7 +9,7 @@ type ImportInfo = Readonly<{
 }>;
 
 export function findImportPaths(
-	imports: Parsed["imports"],
+	imports: ParsedImports["imports"],
 ): readonly ImportInfo[] {
 	return imports.map((v): ImportInfo => {
 		return {

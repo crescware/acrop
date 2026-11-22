@@ -31,7 +31,7 @@ export async function main(): Promise<boolean> {
 		console.info(""); // blank
 	}
 
-	const { scoped, errorsRef, reports, unmatchedPatterns } = check(
+	const { scoped, errorsRef, reports, unmatchedPatterns } = await check(
 		logger,
 		scopeDeclarations,
 		tsFiles,
