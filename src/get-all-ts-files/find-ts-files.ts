@@ -18,9 +18,10 @@ export function findTsFiles(
 		}
 		ancestors.add(id);
 
-		const files = readdirSync(dir);
+		const entries = readdirSync(dir, { withFileTypes: true });
 
-		for (const file of files) {
+		for (const entry of entries) {
+			const file = entry.name;
 			const fullPath = join(dir, file);
 
 			// Skip if it matches .gitignore
@@ -28,17 +29,25 @@ export function findTsFiles(
 				continue;
 			}
 
+			// The listing already tells a plain file apart, and most entries are
+			// plain files, so they need no stat call.
+			if (entry.isFile()) {
+				if (isTypeScriptFile(file)) {
+					results.push(fullPath);
+				}
+				continue;
+			}
+
+			// A link is judged by its target, and a directory is identified by its
+			// device and inode.
 			const stat = statTarget(fullPath);
 			if (stat === null) {
 				continue;
 			}
 
-			const isTypeScriptFile =
-				stat.isFile() && (file.endsWith(".ts") || file.endsWith(".tsx"));
-
 			if (stat.isDirectory()) {
 				searchDir(fullPath, stat);
-			} else if (isTypeScriptFile) {
+			} else if (stat.isFile() && isTypeScriptFile(file)) {
 				results.push(fullPath);
 			}
 		}
@@ -48,6 +57,10 @@ export function findTsFiles(
 
 	searchDir(rootDir, statSync(rootDir, { bigint: true }));
 	return results as readonly string[];
+}
+
+function isTypeScriptFile(file: string): boolean {
+	return file.endsWith(".ts") || file.endsWith(".tsx");
 }
 
 // Returns null for a symbolic link whose target is missing or unresolvable.
