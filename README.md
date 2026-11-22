@@ -8,14 +8,14 @@ acrop checks import boundaries in TypeScript projects. Use it to keep domain cod
 
 ### Install acrop
 
-With Node.js 22 or later, run the command for your package manager in the project you want to check. The GitHub release archive includes the built CLI. [Release v0.0.14](https://github.com/crescware/acrop/releases/tag/v0.0.14)
+With Node.js 22 or later, run the command for your package manager in the project you want to check. It installs the latest release, whose tag includes the built CLI. [Latest release](https://github.com/crescware/acrop/releases/latest)
 
 ```sh
 # npm
-npm install --save-dev https://github.com/crescware/acrop/archive/refs/tags/v0.0.14.tar.gz
+npm install --save-dev "github:crescware/acrop#semver:*"
 
 # pnpm
-pnpm add --save-dev https://github.com/crescware/acrop/archive/refs/tags/v0.0.14.tar.gz
+pnpm add --save-dev "github:crescware/acrop#semver:*"
 ```
 
 ### Define an import boundary

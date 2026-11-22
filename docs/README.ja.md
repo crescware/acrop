@@ -8,14 +8,14 @@ acrop は TypeScript プロジェクトの import をルールに沿って検査
 
 ### インストール
 
-Node.js 22 以上を使い、検査対象のプロジェクトでお使いのパッケージマネージャーに対応するコマンドを実行します。GitHub のリリースアーカイブにはビルド済みの CLI が含まれています。 [リリース v0.0.14](https://github.com/crescware/acrop/releases/tag/v0.0.14)
+Node.js 22 以上を使い、検査対象のプロジェクトでお使いのパッケージマネージャーに対応するコマンドを実行します。最新のリリースがインストールされます。リリースのタグにはビルド済みの CLI が含まれています。 [最新のリリース](https://github.com/crescware/acrop/releases/latest)
 
 ```sh
 # npm
-npm install --save-dev https://github.com/crescware/acrop/archive/refs/tags/v0.0.14.tar.gz
+npm install --save-dev "github:crescware/acrop#semver:*"
 
 # pnpm
-pnpm add --save-dev https://github.com/crescware/acrop/archive/refs/tags/v0.0.14.tar.gz
+pnpm add --save-dev "github:crescware/acrop#semver:*"
 ```
 
 ### import の制約を設定する
