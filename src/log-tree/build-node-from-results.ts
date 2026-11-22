@@ -1,15 +1,15 @@
-import type { AnalyzedResult } from "../check/analyze-import-access";
+import type { RestrictedResult } from "../check/analyze-import-access";
 import { elem, gray, textLine } from "./element-utils";
 import type { TableNode } from "./log-tree";
 
 export function buildNodeFromResults(
-	analyzedResults: readonly AnalyzedResult[],
+	restrictedResults: readonly RestrictedResult[],
 ): TableNode | null {
-	if (analyzedResults.length === 0) {
+	if (restrictedResults.length === 0) {
 		return null;
 	}
 
-	const rows = analyzedResults.map((v) => {
+	const rows = restrictedResults.map((v) => {
 		return [
 			textLine([gray(`${v.line}:${v.column}`)]),
 			textLine([elem(v.path.relative)]),

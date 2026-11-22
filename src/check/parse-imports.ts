@@ -2,12 +2,11 @@ import { readFileSync } from "node:fs";
 import { basename } from "node:path";
 import { type StaticImport, parseSync } from "oxc-parser";
 
-import { getLineStartPositions } from "../get-line-start-positions";
 import type { ErrorReport } from "./error-report";
 
 type Return = Readonly<{
 	imports: readonly StaticImport[];
-	positions: ReturnType<typeof getLineStartPositions>;
+	code: string;
 }> | null;
 
 export function parseImports(path: string, errorsRef: ErrorReport[]): Return {
@@ -25,10 +24,8 @@ export function parseImports(path: string, errorsRef: ErrorReport[]): Return {
 		return null;
 	}
 
-	const positions = getLineStartPositions(code);
-
 	// `result.program` is deliberately not read. The parser hands the tree over
 	// as JSON, and decoding it costs far more than the parse itself. The module
 	// record lists the import declarations at the top level of the file.
-	return { imports: result.module.staticImports, positions };
+	return { imports: result.module.staticImports, code };
 }
