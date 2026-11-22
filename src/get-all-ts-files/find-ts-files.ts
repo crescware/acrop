@@ -1,4 +1,4 @@
-import { readdirSync, statSync } from "node:fs";
+import { type Stats, lstatSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import type ignore from "ignore";
 
@@ -19,7 +19,10 @@ export function findTsFiles(
 				continue;
 			}
 
-			const stat = statSync(fullPath);
+			const stat = statTarget(fullPath);
+			if (stat === null) {
+				continue;
+			}
 
 			const isTypeScriptFile =
 				stat.isFile() && (file.endsWith(".ts") || file.endsWith(".tsx"));
@@ -34,4 +37,16 @@ export function findTsFiles(
 
 	searchDir(rootDir);
 	return results as readonly string[];
+}
+
+// Returns null for a symbolic link whose target is missing or unresolvable.
+function statTarget(path: string): Stats | null {
+	try {
+		return statSync(path);
+	} catch (error) {
+		if (lstatSync(path).isSymbolicLink()) {
+			return null;
+		}
+		throw error;
+	}
 }

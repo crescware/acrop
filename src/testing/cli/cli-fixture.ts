@@ -4,6 +4,7 @@ import {
 	mkdtempSync,
 	realpathSync,
 	rmSync,
+	symlinkSync,
 	writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -12,6 +13,11 @@ import { fileURLToPath } from "node:url";
 import { stripVTControlCharacters } from "node:util";
 import { build } from "tsup";
 import { expect } from "vitest";
+
+// A fixture entry that creates a symbolic link. The target is relative to the link.
+type Symlink = Readonly<{ symlink: string }>;
+
+type FixtureFiles = Record<string, string | Symlink>;
 
 type CliResult = {
 	status: number | null;
@@ -44,7 +50,7 @@ export function createCliFixture() {
 
 	function runCli(
 		scopes: string,
-		files: Record<string, string>,
+		files: FixtureFiles,
 		flags: string[] = [],
 	): CliResult {
 		const config = "acrop.config.ts";
@@ -55,18 +61,22 @@ export function createCliFixture() {
 		return runWithArgs(fixture, [join("project", config), ...flags]);
 	}
 
-	function runWithArgs(
-		files: Record<string, string>,
-		args: string[],
-	): CliResult {
+	function runWithArgs(files: FixtureFiles, args: string[]): CliResult {
 		const cwd = mkdtempSync(join(realpathSync(tmpdir()), "acrop-cli-test-"));
 		const project = join(cwd, "project");
 		try {
-			const fixture = { ".gitignore": "acrop.config.ts", ...files };
+			const fixture: FixtureFiles = {
+				".gitignore": "acrop.config.ts",
+				...files,
+			};
 			for (const [name, content] of Object.entries(fixture)) {
 				const path = join(project, name);
 				mkdirSync(dirname(path), { recursive: true });
-				writeFileSync(path, content);
+				if (typeof content === "string") {
+					writeFileSync(path, content);
+				} else {
+					symlinkSync(content.symlink, path);
+				}
 			}
 			const result = spawnSync(
 				process.execPath,
