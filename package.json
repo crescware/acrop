@@ -1,8 +1,16 @@
 {
 	"name": "acrop",
 	"version": "0.0.14",
-	"description": "",
-	"keywords": [],
+	"description": "A CLI that checks import boundaries in TypeScript projects.",
+	"keywords": [
+		"architecture",
+		"boundaries",
+		"cli",
+		"dependencies",
+		"imports",
+		"lint",
+		"typescript"
+	],
 	"homepage": "https://github.com/crescware/acrop#readme",
 	"bugs": {
 		"url": "https://github.com/crescware/acrop/issues"
@@ -17,13 +25,9 @@
 		"acrop": "./dist/index.mjs"
 	},
 	"files": [
-		"dist",
-		"src",
-		"package.json",
-		"README.md"
+		"dist"
 	],
 	"type": "module",
-	"main": "index.js",
 	"scripts": {
 		"bench": "pnpm run build && node ./scripts/benchmark.mts",
 		"build": "pnpm run check && pnpm run build:cli",
