@@ -1,3 +1,4 @@
+import { minimatch } from "minimatch";
 import { describe, expect, test } from "vitest";
 
 import { compiledPatternLimit, matchesPattern } from "./matches-pattern";
@@ -19,6 +20,67 @@ describe("matchesPattern()", () => {
 	] as const)("$pattern against $path", ({ pattern, path, expected }) => {
 		expect(matchesPattern(path, pattern)).toBe(expected);
 	});
+
+	// A path that cannot start the way the pattern requires is rejected without
+	// asking minimatch. These patterns and paths are the ones where working out
+	// that start is delicate.
+	const patterns = [
+		"./lib/a/**/*",
+		"./lib/a",
+		"./lib/a/",
+		"./lib/a/*.ts",
+		"./lib/{a,b}/**/*",
+		"./lib/{a,ab}/x",
+		"./lib/a/../b/*",
+		"./lib/{a/..,b}/x",
+		"./lib/a/.{.,x}/b",
+		"./lib/./a/*",
+		"./lib//a/*",
+		"./lib/a\\*b/*",
+		"./lib/[a]/x",
+		"./**/a/*",
+		"/lib/a/*",
+		"lib/a/*",
+		"!./lib/a/*",
+		".",
+		"./",
+	];
+	const paths = [
+		"",
+		".",
+		"./",
+		"./lib",
+		"./lib/",
+		"./lib/a",
+		"./lib/a/",
+		"./lib/a/x",
+		"./lib/a/x.ts",
+		"./lib/a/b/x",
+		"./lib/b/x",
+		"./lib/ab/x",
+		"./lib/x",
+		"./lib/a*b/x",
+		"./lib/.x/b",
+		"./lib/a/.x/b",
+		"./lib/./a/x",
+		"./lib//a/x",
+		".//lib/a/x",
+		"./lib/a//x",
+		"./other/a/x",
+		"/lib/a/x",
+		"lib/a/x",
+	];
+
+	test.each(patterns.map((pattern) => ({ pattern })))(
+		"agrees with minimatch on every path for $pattern",
+		({ pattern }) => {
+			for (const path of paths) {
+				expect(matchesPattern(path, pattern), path).toBe(
+					minimatch(path, pattern),
+				);
+			}
+		},
+	);
 
 	test("stays correct after compiling more patterns than it keeps", () => {
 		for (let i = 0; i <= compiledPatternLimit; i++) {
