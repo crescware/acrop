@@ -1,3 +1,4 @@
+import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
 import { createCliFixture } from "./cli-fixture";
@@ -95,8 +96,10 @@ describe("CLI input errors", () => {
 			"project/acrop.config.ts",
 		]);
 		expect(result.status).toBe(1);
-		expect(result.stderr).toMatch(/acrop\.config\.ts/);
-		expect(result.stderr).toMatch(/Unexpected token/);
+		expect(result.stderr).toContain(
+			`Failed to transform configuration file at: ${join(result.project, "acrop.config.ts")}`,
+		);
+		expect(result.stderr).toMatch(/Expected `}` but found `EOF`/);
 		expect(result.lines).toEqual(["Exiting with code 1"]);
 	});
 

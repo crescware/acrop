@@ -1,8 +1,7 @@
-import { existsSync, unlinkSync, writeFileSync } from "node:fs";
-import { createRequire } from "node:module";
+import { existsSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
-import { transformFileSync } from "@babel/core";
+import { transform } from "oxc-transform";
 import { type InferOutput, flatten, safeParse } from "valibot";
 
 import type { VerboseLogger } from "../verbose-logger";
@@ -21,14 +20,15 @@ export async function importConfig(
 	}
 
 	const end2 = logger.start("> Transform config file");
-	const result = transformFileSync(path, {
-		presets: [
-			createRequire(import.meta.url).resolve("@babel/preset-typescript"),
-		],
-		filename: path,
-		sourceMaps: false,
-	});
-	const code = result?.code ?? "";
+	const result = transform(path, readFileSync(path, "utf-8"));
+	if (0 < result.errors.length) {
+		throw new Error(
+			[
+				`Failed to transform configuration file at: ${path}`,
+				...result.errors.map((error) => error.codeframe ?? error.message),
+			].join("\n"),
+		);
+	}
 	end2();
 
 	const end3 = logger.start("> Write js config file");
@@ -39,7 +39,7 @@ export async function importConfig(
 
 	let mod: unknown;
 	try {
-		writeFileSync(tempConfigPath, code);
+		writeFileSync(tempConfigPath, result.code);
 		mod = (await import(tempConfigPath)) as unknown;
 	} finally {
 		unlinkSync(tempConfigPath);

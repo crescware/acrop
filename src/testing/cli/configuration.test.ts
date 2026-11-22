@@ -30,6 +30,30 @@ describe("CLI configuration and file discovery", () => {
 		expect(result.lines).toEqual(["Exiting with code 1"]);
 	});
 
+	test("loads a config that uses an enum and imports a type without the type keyword", () => {
+		const result = runWithArgs(
+			{
+				"acrop.config.ts": [
+					'import { Config } from "./missing-types";',
+					'enum Dir { Src = "./src" }',
+					"const config: Config = {",
+					'\troot: ".",',
+					"\tscopes: [{ scope: `${Dir.Src}/*`, rules: [] }],",
+					"};",
+					"export default config;",
+				].join("\n"),
+				"src/a.ts": 'import "./b";',
+			},
+			[join("project", "acrop.config.ts")],
+		);
+		expectReport(result, 1, [
+			"./src/a.ts (1)",
+			"1:8 ./src/b ./src/*",
+			"Files Checked 1 file (1 found, 0 unscoped)",
+			"Restricted Imports 1 line",
+		]);
+	});
+
 	test("scans TSX from the config directory and respects its .gitignore", () => {
 		const result = runCli(
 			'[{ scope: "./src/**/*", rules: [{ restricted: ["./ui"], name: "UI boundary" }] }]',
