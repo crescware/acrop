@@ -33,16 +33,18 @@ describe("CLI file discovery", () => {
 	});
 
 	test("visits each directory depth-first in byte order of entry names", () => {
+		// No two names in a directory differ only by case, because a file system
+		// that ignores case, the default on macOS, would keep one file for both.
 		const result = listFiles({
 			"b.ts": "",
 			"a.ts": "",
 			"a-b.ts": "",
 			"a/z.ts": "",
-			"B.ts": "",
+			"Z.ts": "",
 		});
 		expectReport(result, 0, [
 			"Unscoped Files (5)",
-			"./B.ts",
+			"./Z.ts",
 			"./a/z.ts",
 			"./a-b.ts",
 			"./a.ts",
