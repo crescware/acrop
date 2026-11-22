@@ -1,5 +1,3 @@
-import { dirname, relative, resolve } from "node:path";
-
 import { exists } from "../exists";
 import type { Report } from "../log-tree";
 import type { UnmatchedPatternsTracker } from "../unmatched-pattern-tracker";
@@ -8,6 +6,7 @@ import { analyzeImportAccess } from "./analyze-import-access";
 import { calcRules } from "./calc-rules";
 import type { ErrorReport } from "./error-report";
 import { findImportPaths } from "./find-import-paths";
+import { makeImportResolver } from "./make-import-resolver";
 import { makeLocator } from "./make-locator";
 import { parseImports } from "./parse-imports";
 
@@ -35,13 +34,13 @@ export function checkScope(
 		const rules = calcRules(root, path.absolute, declaration, trackerRef);
 
 		const end4 = logger.start(`> > "${path.relative}" Find import paths`);
+		const resolveImport = makeImportResolver(root, path.absolute);
 		const infoArray = findImportPaths(imports).map(
 			(v): ReturnType<typeof findImportPaths>[number] => {
-				const relativePath = `./${relative(
-					root,
-					resolve(dirname(path.absolute), v.path.relative),
-				)}`;
-				return { path: { relative: relativePath }, start: v.start };
+				return {
+					path: { relative: resolveImport(v.path.relative) },
+					start: v.start,
+				};
 			},
 		);
 		end4();
