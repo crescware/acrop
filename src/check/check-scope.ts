@@ -8,7 +8,7 @@ import { analyzeImportAccess } from "./analyze-import-access";
 import { calcRules } from "./calc-rules";
 import type { ErrorReport } from "./error-report";
 import { findImportPaths } from "./find-import-paths";
-import { makeAst } from "./make-ast";
+import { parseImports } from "./parse-imports";
 
 export function checkScope(
 	logger: VerboseLogger,
@@ -23,18 +23,18 @@ export function checkScope(
 	for (const path of filtered) {
 		const end3 = logger.start(`> > "${path.relative}" Make ast`);
 
-		const makeAstResult = makeAst(path.absolute, errorsRef);
-		if (!exists(makeAstResult)) {
+		const parsed = parseImports(path.absolute, errorsRef);
+		if (!exists(parsed)) {
 			end3();
 			continue;
 		}
 		end3();
 
-		const { ast, positions } = makeAstResult;
+		const { imports, positions } = parsed;
 		const rules = calcRules(root, path.absolute, declaration, trackerRef);
 
 		const end4 = logger.start(`> > "${path.relative}" Find import paths`);
-		const infoArray = findImportPaths(ast, positions).map(
+		const infoArray = findImportPaths(imports, positions).map(
 			(v): ReturnType<typeof findImportPaths>[number] => {
 				const relativePath = `./${relative(
 					root,

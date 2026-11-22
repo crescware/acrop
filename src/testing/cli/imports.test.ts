@@ -51,6 +51,38 @@ describe("CLI import extraction", () => {
 		]);
 	});
 
+	test("skips import declarations below the top level of the file", () => {
+		const result = checkImports(
+			[
+				"{",
+				'\timport "./block";',
+				"}",
+				'declare module "m" {',
+				'\timport { n } from "./ambient";',
+				"\texport const v: typeof n;",
+				"}",
+			].join("\n"),
+		);
+		expectReport(result, 0, [
+			"Files Checked 1 file (1 found, 0 unscoped)",
+			"Restricted Imports 0 lines",
+		]);
+	});
+
+	test("reports repeated specifiers in source order", () => {
+		const result = checkImports(
+			['import "./x";', 'import "./y";', 'import a from "./x";'].join("\n"),
+		);
+		expectReport(result, 1, [
+			"./src/a.ts (3)",
+			"1:8 ./src/x ./src/*",
+			"2:8 ./src/y ./src/*",
+			"3:15 ./src/x ./src/*",
+			"Files Checked 1 file (1 found, 0 unscoped)",
+			"Restricted Imports 3 lines",
+		]);
+	});
+
 	test("resolves every specifier as a path relative to the importer", () => {
 		const result = checkImports(
 			[

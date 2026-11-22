@@ -1,11 +1,7 @@
-import type { InferOutput } from "valibot";
-
 import { calcLineNumber } from "../calc-line-number";
-import { isImportDeclaration, type node$ } from "./ast";
-import type { makeAst } from "./make-ast";
+import type { parseImports } from "./parse-imports";
 
-type Ast = NonNullable<ReturnType<typeof makeAst>>["ast"];
-type Positions = NonNullable<ReturnType<typeof makeAst>>["positions"];
+type Parsed = NonNullable<ReturnType<typeof parseImports>>;
 
 type ImportInfo = Readonly<{
 	path: Readonly<{
@@ -16,38 +12,14 @@ type ImportInfo = Readonly<{
 }>;
 
 export function findImportPaths(
-	ast: Ast,
-	positions_: Positions,
+	imports: Parsed["imports"],
+	positions: Parsed["positions"],
 ): readonly ImportInfo[] {
-	const importInfos: ImportInfo[] = [];
-
-	function traverse(
-		node: InferOutput<typeof node$>,
-		positions: Positions,
-	): void {
-		if (isImportDeclaration(node)) {
-			const { line, column } = calcLineNumber(positions, node.source.start + 1);
-			importInfos.push({
-				path: { relative: node.source.value },
-				line,
-				column,
-			});
-			return;
-		}
-
-		if ("body" in node && Array.isArray(node.body)) {
-			for (const v of node.body) {
-				traverse(v, positions_);
-			}
-			return;
-		}
-
-		// noop
-	}
-
-	for (const v of ast.body) {
-		traverse(v, positions_);
-	}
-
-	return importInfos as readonly ImportInfo[];
+	return imports.map((v): ImportInfo => {
+		const { line, column } = calcLineNumber(
+			positions,
+			v.moduleRequest.start + 1,
+		);
+		return { path: { relative: v.moduleRequest.value }, line, column };
+	});
 }

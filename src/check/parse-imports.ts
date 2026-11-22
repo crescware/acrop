@@ -1,18 +1,16 @@
 import { readFileSync } from "node:fs";
 import { basename } from "node:path";
-import { parseSync } from "oxc-parser";
-import { type InferOutput, parse } from "valibot";
+import { type StaticImport, parseSync } from "oxc-parser";
 
 import { getLineStartPositions } from "../get-line-start-positions";
-import { ast$ } from "./ast";
 import type { ErrorReport } from "./error-report";
 
 type Return = Readonly<{
-	ast: InferOutput<typeof ast$>;
+	imports: readonly StaticImport[];
 	positions: ReturnType<typeof getLineStartPositions>;
 }> | null;
 
-export function makeAst(path: string, errorsRef: ErrorReport[]): Return {
+export function parseImports(path: string, errorsRef: ErrorReport[]): Return {
 	const code = readFileSync(path, "utf-8");
 
 	const result = parseSync(basename(path), code, {
@@ -29,5 +27,8 @@ export function makeAst(path: string, errorsRef: ErrorReport[]): Return {
 
 	const positions = getLineStartPositions(code);
 
-	return { ast: parse(ast$, result.program), positions };
+	// `result.program` is deliberately not read. The parser hands the tree over
+	// as JSON, and decoding it costs far more than the parse itself. The module
+	// record lists the import declarations at the top level of the file.
+	return { imports: result.module.staticImports, positions };
 }
