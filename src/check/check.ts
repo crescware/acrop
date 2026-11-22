@@ -1,7 +1,6 @@
-import { minimatch } from "minimatch";
-
 import type { importConfig } from "../import-config";
 import type { Report } from "../log-tree";
+import { matchesPattern } from "../pattern/matches-pattern";
 import {
 	type PatternInfo,
 	UnmatchedPatternsTracker,
@@ -36,7 +35,7 @@ export function check(
 		const matchedFiles: (typeof tsFiles)[number][] = [];
 		for (const file of remaining) {
 			const end3 = logger.start(`> > "${file.relative}" Match file`);
-			if (minimatch(file.relative, declaration.scope)) {
+			if (matchesPattern(file.relative, declaration.scope)) {
 				matchedFiles.push(file);
 				remaining.delete(file);
 			}

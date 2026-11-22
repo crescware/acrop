@@ -1,5 +1,4 @@
-import { minimatch } from "minimatch";
-
+import { matchesPattern } from "../../pattern/matches-pattern";
 import type { UnmatchedPatternsTracker } from "../../unmatched-pattern-tracker";
 import type { Rule, calcRules } from "../calc-rules";
 import type { findImportPaths } from "../find-import-paths";
@@ -14,7 +13,7 @@ export function analyze(
 	let matchedRule: Rule | null = null;
 
 	for (const rule of rulesResult.rules) {
-		const matched = minimatch(info.path.relative, rule.pattern);
+		const matched = matchesPattern(info.path.relative, rule.pattern);
 		if (!matched) {
 			continue;
 		}
