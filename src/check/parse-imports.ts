@@ -1,27 +1,32 @@
 import { readFileSync } from "node:fs";
 import { basename } from "node:path";
-import { type StaticImport, parseSync } from "oxc-parser";
+import { type StaticImport, parseAsync } from "oxc-parser";
 
-import type { ErrorReport } from "./error-report";
-
-type Return = Readonly<{
+export type ParsedImports = Readonly<{
 	imports: readonly StaticImport[];
 	code: string;
-}> | null;
+}>;
 
-export function parseImports(path: string, errorsRef: ErrorReport[]): Return {
+type SyntaxErrors = Readonly<{
+	errors: readonly string[];
+}>;
+
+/**
+ * Resolves with the import declarations of a file, or with the parser's
+ * messages when the file has syntax errors. The parser runs on Node's thread
+ * pool, so files that are parsed at the same time are parsed in parallel.
+ */
+export async function parseImports(
+	path: string,
+): Promise<ParsedImports | SyntaxErrors> {
 	const code = readFileSync(path, "utf-8");
 
-	const result = parseSync(basename(path), code, {
+	const result = await parseAsync(basename(path), code, {
 		sourceType: "module",
 	});
 
 	if (0 < result.errors.length) {
-		errorsRef.push({
-			path,
-			errors: result.errors.map((error) => error.message),
-		});
-		return null;
+		return { errors: result.errors.map((error) => error.message) };
 	}
 
 	// `result.program` is deliberately not read. The parser hands the tree over

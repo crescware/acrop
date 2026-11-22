@@ -1,4 +1,5 @@
-import { afterAll, beforeAll, describe, test } from "vitest";
+import { join } from "node:path";
+import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
 import { createCliFixture, expectReport } from "./cli-fixture";
 
@@ -48,6 +49,29 @@ describe("CLI file discovery", () => {
 			"./b.ts",
 			"Files Checked 0 files (5 found, 5 unscoped)",
 			"Restricted Imports 0 lines",
+		]);
+	});
+
+	test("keeps that order and reports a syntax error when a scope's files are parsed in several batches", () => {
+		const names = Array.from(
+			{ length: 150 },
+			(_, i) => `f${String(i).padStart(3, "0")}.ts`,
+		);
+		const files = Object.fromEntries(
+			names.map((name) => [`src/${name}`, 'import "./x";']),
+		);
+		const result = runCli('[{ scope: "./src/*", rules: [] }]', {
+			...files,
+			"src/f070.ts": "import",
+		});
+		expectReport(result, 1, [
+			join(result.project, "src/f070.ts"),
+			expect.stringMatching(/expected.*from.*EOF/i),
+			...names
+				.filter((name) => name !== "f070.ts")
+				.flatMap((name) => [`./src/${name} (1)`, "1:8 ./src/x ./src/*"]),
+			"Files Checked 149 files (150 found, 1 unscoped)",
+			"Restricted Imports 149 lines",
 		]);
 	});
 
