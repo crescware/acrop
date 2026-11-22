@@ -76,7 +76,7 @@ The report shows the importing file, its violation count, the line and column of
 
 ## How configuration works
 
-The configuration must default-export an object with a scan directory (`root`) and an ordered `scopes` array. A relative `root` resolves from the directory containing the configuration file. For example, `"./src"` scans the `src/` subdirectory. acrop reads `.gitignore` from the scan directory. It follows symbolic links and skips links whose targets cannot be resolved.
+The configuration must default-export an object with a scan directory (`root`) and an ordered `scopes` array. A relative `root` resolves from the directory containing the configuration file. For example, `"./src"` scans the `src/` subdirectory. acrop reads `.gitignore` from the scan directory. It follows symbolic links, but skips links whose targets cannot be resolved and links back to a directory it is already searching.
 
 - `scope` is a glob that matches source files relative to the scan directory. Start scope and target globs with `./`.
 - The first matching scope applies to each file. Within that scope, the first matching rule decides each import. Imports in scope that match no rule are restricted. Files outside all scopes are skipped.

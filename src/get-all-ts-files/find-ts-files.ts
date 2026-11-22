@@ -1,4 +1,4 @@
-import { type Stats, lstatSync, readdirSync, statSync } from "node:fs";
+import { type BigIntStats, lstatSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import type ignore from "ignore";
 
@@ -7,8 +7,17 @@ export function findTsFiles(
 	ig: ReturnType<typeof ignore>,
 ): readonly string[] {
 	const results: string[] = [];
+	// Device and inode of each directory from the scan root to the current one.
+	// A symbolic link back to one of them would otherwise recurse forever.
+	const ancestors = new Set<string>();
 
-	function searchDir(dir: string): void {
+	function searchDir(dir: string, dirStat: BigIntStats): void {
+		const id = `${dirStat.dev}:${dirStat.ino}`;
+		if (ancestors.has(id)) {
+			return;
+		}
+		ancestors.add(id);
+
 		const files = readdirSync(dir);
 
 		for (const file of files) {
@@ -28,21 +37,24 @@ export function findTsFiles(
 				stat.isFile() && (file.endsWith(".ts") || file.endsWith(".tsx"));
 
 			if (stat.isDirectory()) {
-				searchDir(fullPath);
+				searchDir(fullPath, stat);
 			} else if (isTypeScriptFile) {
 				results.push(fullPath);
 			}
 		}
+
+		ancestors.delete(id);
 	}
 
-	searchDir(rootDir);
+	searchDir(rootDir, statSync(rootDir, { bigint: true }));
 	return results as readonly string[];
 }
 
 // Returns null for a symbolic link whose target is missing or unresolvable.
-function statTarget(path: string): Stats | null {
+// BigInt stats keep inode numbers exact on file systems with 64-bit inodes.
+function statTarget(path: string): BigIntStats | null {
 	try {
-		return statSync(path);
+		return statSync(path, { bigint: true });
 	} catch (error) {
 		if (lstatSync(path).isSymbolicLink()) {
 			return null;
